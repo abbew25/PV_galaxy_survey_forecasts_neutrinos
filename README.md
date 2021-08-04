@@ -1,9 +1,9 @@
 # Forecasting constraints for neutrino mass with peculiar velocity surveys
 
 ## About
-This repository contains code to produce forecasts for galaxy surveys, with or without peculiar velocity measurements, to constrain the sum of neutrino masses.
+This repository contains code to produce forecasts for galaxy surveys to constrain the sum of neutrino masses. The code allows you to produce forecasts for surveys with redshift information, peculiar velocity information, or a survey that has both.
 
-This code is largely based off the code here: https://github.com/CullanHowlett/PV_fisher
+This code is heavily inspired/based off the code here: https://github.com/CullanHowlett/PV_fisher
 
 ## Table of contents
 
@@ -15,7 +15,7 @@ This code is largely based off the code here: https://github.com/CullanHowlett/P
 ## Technologies required
 
 This code was created with Python 3 (3.7.6). You will need to also install the CLASS package, see instructions at https://lesgourg.github.io/class_public/class.html.
-Other packages include, scipy, numpy, matplotlib, pandas, os, time, pickle.
+Other python packages used include: scipy, numpy, pandas, os, time, pickle.
 
 ## How to use 
 
