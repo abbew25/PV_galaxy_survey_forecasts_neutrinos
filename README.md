@@ -1,7 +1,7 @@
 # Forecasting constraints for neutrino mass with peculiar velocity surveys
 
 ## About
-This repository contains code to produce forecasts for galaxy surveys to constrain the sum of neutrino masses. The code allows you to produce forecasts for surveys with redshift information, peculiar velocity information, or a survey that has both.
+This repository contains code to produce Fisher information forecasts for galaxy surveys to constrain the sum of neutrino masses. The code allows you to produce forecasts for surveys with redshift information, peculiar velocity information, or a survey that has both.
 
 This code is heavily inspired/based off the code here: https://github.com/CullanHowlett/PV_fisher
 
