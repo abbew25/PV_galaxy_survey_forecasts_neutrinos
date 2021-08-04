@@ -1,4 +1,4 @@
-# PV galaxy survey forecasts neutrinos
+# Forecasting constraints for neutrino mass with peculiar velocity surveys
 
 ## About
 This repository contains code to produce forecasts for galaxy surveys, with or without peculiar velocity measurements, to constrain the sum of neutrino masses.
