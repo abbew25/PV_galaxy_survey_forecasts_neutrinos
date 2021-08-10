@@ -28,7 +28,7 @@ You need to specify some information correctly in the script, and you need to al
 
 There are example files above for the required number density of objects in the redshift survey and PV survey, and the example_results folder has an example of the results from running my codes with the current settings, with the example number density files.
 
-To run forecasts, all you need are files with the number density of redshifts and peculiar velocities for the surveys you are forecasting for as a function of redshift, and you need to know the sky area for your surveys and the overlap between your redshift and peculiar velocity survey. Then just choose the rest of the settings you want in ```run_main_forecasting_script.py``.
+To run forecasts, all you need are files with the number density of redshifts and peculiar velocities for the surveys you are forecasting for as a function of redshift, and you need to know the sky area for your surveys and the overlap between your redshift and peculiar velocity survey. Then just choose the rest of the settings you want in ```run_main_forecasting_script.py```.
 
 ## More information 
 
