@@ -27,4 +27,7 @@ If you want a forecast for cosmological parameters where nuisance parameters are
 You need to specify some information correctly in the script, and you need to already have fisher matrices for the different redshift bins written to a file (which can be achieved with ```run_main_forecasting_script.py``` for a survey). Then when you run ```read_in_matrices_get_forecasts.py```, it will treat parameters like the galaxy bias, as a different parameter in separate redshift bins for your forecasts (rather than as the same parameter across all bins, by adding the information on the bias in each bin together).
 
 
+## More information 
+
+TBA
 
