@@ -32,5 +32,5 @@ To run forecasts, all you need are files with the number density of redshifts an
 
 ## More information 
 
-TBA
+A blog post about the project I am working related to this code can be found here: https://astrolaureate.github.io/projects/neutrinospeculiarvelocities 
 
