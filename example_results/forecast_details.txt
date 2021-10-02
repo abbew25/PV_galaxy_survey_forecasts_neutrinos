@@ -1,13 +1,13 @@
 kmax/h: 0.2
 central param vals: [67.32, 2.1005829616811544, 0.022383, 0.12011, 0.058, 1.0, 1.34, 4.24, 13.0, 0.96605, 0.0543]
-step_sizes_cosmo: [2.7, 0.0029000000000000002, 6e-05, 0.00015, 0.001, 0.025]
+step_sizes_cosmo: [2.7, 0.0029000000000000002, 6e-05, 0.00015, 0.001, 0.025, 0.01]
 linear or nonlinear: linear
 + Planck data?: Planck 2018 PlikHM TT + TE + EE + lowE + lowl + lensing /Planck 2018 PlikHM TT + TE + EE + lowE + lowl (N_eff is free)
 zmin, zmax: [0.0, 0.5]
 num redshift bins: 5
 number density files: ['/home/abbew/honours_codes_28.9.20/class_codes/forecasting_codes/AP_effect_forecasts/forecasting_adding_Neff_param/codes_for_REPO_neutrinos/example_redshift_number_densities.csv', '/home/abbew/honours_codes_28.9.20/class_codes/forecasting_codes/AP_effect_forecasts/forecasting_adding_Neff_param/codes_for_REPO_neutrinos/example_PV_number_densities.csv']
 neutrino hierarchy: normal
-survey area: [1.3186, 0.0, 0.0]
+survey area: [0.0, 0.0, 1.3186]
 error distance indicator: 0.2
 random error due to nonlinear motion: 300.0
-free param flags: [0, 1, 2, 3, 4, 7, 10]
+free param flags: [0, 1, 2, 3, 4, 13, 14, 7, 9, 10]
