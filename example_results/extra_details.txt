@@ -1,2 +1,1 @@
-Value of effective redshift for all fisher information (matrices summed) in this forecasting run:  0.3547535902442992
-Value of kmin that sets value of f_0 such that f_0*fbar(k) = f(k):  0.003101400700350175
+Value of effective redshift for all fisher information (matrices summed) in this forecasting run:  0.35483537672916354
