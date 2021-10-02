@@ -209,16 +209,11 @@ def run_class(omega_b_t, omega_cdm_t, H0_t, As_t, m_nu_t, neutrino_hierarchy, ze
 knum, dm2_atm, dm2_sol, del_mnu_max, sum_masses_central_t, kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid,
 H0_fid, As_fid, m_nu_fid, mus_fid_arr, linornonlin, N_eff_deviation):
     ''' 
-
     Function to compute the matter power spectrum from Class() (which is equal to the velocity divergence and cross correlation of the velocity and 
     density power spectrum in linear theory).
-
     Returns Pk, k_real and mu_real (assuming mu_fiducial is supplied).
-
     zed always need to be in a vector (even for a single z).
-
     mu always needs to be in a vector (even for a single mu).
-
     Shape of Pk returned, k_real returned and mu_real returned will depend on whether AP effect is taken into account or not (whether fiducial
     and real cosmological model differ or not).
     '''
@@ -308,7 +303,6 @@ H0_fid, As_fid, m_nu_fid, mus_fid_arr, N_eff_deviation):
     ''' 
     This function allows one to compute f numerically using the finite difference method for a single value of z.
     mus_fid_arr needs to be an array.
-
     Shape of f(k) returned, k_real returned and mu_real returned will depend on whether AP effect is taken into account or not (whether fiducial
     and real cosmological model differ or not).
     '''
@@ -362,15 +356,16 @@ def derivative_growth_rate(param, delta, omega_b_t, omega_cdm_t, H0_t, As_t, m_n
     This function allows one to compute df/dx where x is either Omega_bh2, Omega_ch2, mnu, As or H0. 
     This function only works for a single value of z. 
     df/dx is returned. 
-
     param = 1 gets df/dH0
     param = 2 gets df/dMnu 
     param = 3 gets df/dObh
     param = 4 gets df/dOch 
     param = 9 gets df/dAs 
+    param = 10 gets df/dNeff
+    param = 11 gets df_dns
     '''
 
-    if param == 1:
+    if param == 1: 
         lowf = growth_rate(omega_b_t, omega_cdm_t, H0_t-delta, As_t, m_nu_t, neutrino_hierarchy, zed, 
         kmin_fid, kmax_fid, knum, d_a, linear, dm2_atm, dm2_sol, del_mnu_max, sum_masses_central_t, 
         kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_fid_arr, N_eff_deviation)[0]
@@ -426,6 +421,31 @@ def derivative_growth_rate(param, delta, omega_b_t, omega_cdm_t, H0_t, As_t, m_n
         highf = growth_rate(omega_b_t, omega_cdm_t, H0_t, As_t-delta, m_nu_t, neutrino_hierarchy, 
         zed, kmin_fid, kmax_fid, knum, d_a, linear, dm2_atm, dm2_sol, del_mnu_max, sum_masses_central_t, 
         kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_fid_arr, N_eff_deviation)[0]
+
+        df_da = (highf - lowf)/(2*delta)
+        return df_da
+
+    elif param == 10: # Neff
+        lowf = growth_rate(omega_b_t, omega_cdm_t, H0_t, As_t, m_nu_t, neutrino_hierarchy, zed, 
+        kmin_fid, kmax_fid, knum, d_a, linear, dm2_atm, dm2_sol, del_mnu_max, sum_masses_central_t, 
+        kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_fid_arr, -N_eff_deviation)[0]
+
+        highf = growth_rate(omega_b_t, omega_cdm_t, H0_t, As_t, m_nu_t, neutrino_hierarchy, 
+        zed, kmin_fid, kmax_fid, knum, d_a, linear, dm2_atm, dm2_sol, del_mnu_max, sum_masses_central_t, 
+        kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_fid_arr, N_eff_deviation)[0]
+
+        df_da = (highf - lowf)/(2*delta)
+        return df_da
+
+    elif param == 11: # ns 
+        
+        lowf = growth_rate(omega_b_t, omega_cdm_t, H0_t, As_t, m_nu_t, neutrino_hierarchy, zed, 
+        kmin_fid, kmax_fid, knum, d_a, linear, dm2_atm, dm2_sol, del_mnu_max, sum_masses_central_t, 
+        kspaceoption, tau_t, ns_t-delta, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_fid_arr, N_eff_deviation)[0]
+
+        highf = growth_rate(omega_b_t, omega_cdm_t, H0_t, As_t, m_nu_t, neutrino_hierarchy, 
+        zed, kmin_fid, kmax_fid, knum, d_a, linear, dm2_atm, dm2_sol, del_mnu_max, sum_masses_central_t, 
+        kspaceoption, tau_t, ns_t+delta, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_fid_arr, N_eff_deviation)[0]
 
         df_da = (highf - lowf)/(2*delta)
         return df_da
@@ -631,7 +651,6 @@ def dP_gg_dx(param, bg, rg, f_t, df_dx_t, mu_real, k_real, sigmag, P_mm_t, dP_mm
     ''' 
     Function to semi-analytically calculate dP_gg_dx where x is some parameter.
     Only dP/dx is returned.
-
     The user needs to pass in P_mm(k), dP_mm_dx(k), f(k), df_dx, 
     where x can be:
         1 = H0
@@ -642,6 +661,8 @@ def dP_gg_dx(param, bg, rg, f_t, df_dx_t, mu_real, k_real, sigmag, P_mm_t, dP_mm
         5 = sigma_g
         6 = galaxy bias 
         7 = r_g
+        10 = Neff
+        11 = ns
     THe user also needs to pass in dk_real_dx and dmu_real_dx. 
     '''
     Dg2 = 1/(1 + ( (mu_real*k_real*sigmag)**2 )/2)
@@ -717,6 +738,13 @@ def dP_gg_dx(param, bg, rg, f_t, df_dx_t, mu_real, k_real, sigmag, P_mm_t, dP_mm
         res = (2*bg*f_t*(mu_real**2))*Dg2*P_mm_t/(q_para*(q_perp**2))
         return res
 
+    elif param == 11 or param == 10: # n_s (11) or Neff (10)
+
+        res = ( bg**2 + 2*rg*bg*f_t*(mu_real**2) + (mu_real**4)*(f_t**2) )*dP_mm_dx_t
+        res += ( 2.0*rg*bg*(mu_real**2) + 2.0*f_t*(mu_real**4)  )*df_dx_t*P_mm_t
+        res *= Dg2/(q_para*(q_perp**2))
+        return res 
+
     else:
         raise ValueError('param value (o) is probably not correct')
 
@@ -726,7 +754,6 @@ def dP_gu_dx(param, bg, rg, f_t, df_dx_t, mu_real, k_real, sigmag, sigmau, P_mm_
     q_para, q_perp, dq_para_dx, dq_perp_dx):
     ''' 
     Function to semi-analytically calculate dP_gu_dx where x is some parameter.
-
     The user needs to pass in P_mm(k) (P_mtheta), dP_mm_dx(k) (dP_mtheta_dx), f(k), 
     df_dx where x can be:
         1 = H0
@@ -738,8 +765,9 @@ def dP_gu_dx(param, bg, rg, f_t, df_dx_t, mu_real, k_real, sigmag, sigmau, P_mm_
         6 = galaxy bias 
         7 = r_g
         8 = sigma_u
+        10 = Neff
+        11 = ns 
     The user also needs to pass in dk_real_dx and dmu_real_dx. 
-
     '''
     Dg = (1/(np.sqrt(1 + ((mu_real*sigmag*k_real)**2)/2)))
     Du = np.sinc(k_real*sigmau/np.pi)
@@ -824,6 +852,13 @@ def dP_gu_dx(param, bg, rg, f_t, df_dx_t, mu_real, k_real, sigmag, sigmau, P_mm_
         res *= Dg
         return res
 
+    elif param == 10 or param == 11: # Neff or ns 
+
+        res = ( rg*bg*f_t + (mu_real*f_t)**2 )*dP_mm_dx_t
+        res += ( rg*bg + 2.0*(mu_real**2)*f_t )*df_dx_t*P_mm_t
+        res *= (a*H_z_t*mu_real/k_real)*(1.0/(q_para*(q_perp**2)))*Dg
+        return res 
+
     else:
         raise ValueError('param value (o) is probably not correct')
 
@@ -834,7 +869,6 @@ def dP_uu_dx(param, mu_real, k_real, f_t, df_dx_t, sigmau, P_mm_t, dP_mm_dx_t, H
     q_para, q_perp, dq_para_dx, dq_perp_dx):
     ''' 
     Function to semi-analytically calculate dP_uu_dx where x is some parameter.
-
     The user needs to pass in P_mm(k) (P_theta theta), dP_mm_dx(k) (dP_theta theta_dx), 
     f(k), df_dx where x can be:
         1 = H0
@@ -843,6 +877,8 @@ def dP_uu_dx(param, mu_real, k_real, f_t, df_dx_t, sigmau, P_mm_t, dP_mm_dx_t, H
         4 = Och
         9 = As
         8 = sigma_u
+        10 = Neff
+        11 = ns 
     THe user also needs to pass in dk_real_dx and dmu_real_dx. 
     '''
     h_t = H0_t/100
@@ -895,6 +931,13 @@ def dP_uu_dx(param, mu_real, k_real, f_t, df_dx_t, sigmau, P_mm_t, dP_mm_dx_t, H
         res = (1.0/(q_para*(q_perp**2)))*((a*H_z_t*mu_real*f_t/k_real)**2)*(2*np.sinc(k_real*sigmau/np.pi))*(k_real*sigmau*np.cos(k_real*sigmau) - np.sin(k_real*sigmau))*P_mm_t/(k_real*(sigmau**2))
         return res
 
+    elif param == 10 or param == 11: # varying Neff or varying ns 
+
+        res = ((a*H_z_t*mu_real/k_real)**2)*(f_t**2)*dP_mm_dx_t
+        res += 2.0*((a*H_z_t*mu_real/k_real)**2)*df_dx_t*f_t*P_mm_t
+        res *= (1.0/(q_para*(q_perp**2)))*Du2
+        return res 
+
     else:
         raise ValueError('param value (o) is probably not correct')
 
@@ -921,11 +964,9 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
     """ 
     Function to compute derivatives or make a plot of some derivatives for some parameter (given by o), 
     some power spectrum (given by P) and some redshift z.
-
     To compute derivatives of the galaxy-galaxy redshift space power spectrum, enter P = 1.
     To compute derivatives of the galaxy-velocity redshift space power spectrum, enter P = 2.
     To compute derivatives of the velocity-velocity redshift space power spectrum, enter P = 3.
-
     To compute the derivative of chosen power spectrum w.r.t. some parameter x, set o to:
     x = H0 ->                                   set o = 1 
     x = sum neutrino masses ->                  set o = 2 
@@ -938,43 +979,32 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
     x = sigma_u ->                              set o = 8 (parameter related to non-linear motion of galaxies)
     x = As ->                                   set o = 9 
     x = N_eff ->                                set o = 10 (the effective number of neutrino species)
+    x = n_s ->                                  set o = 11 (the spectral index)
     
-
     To just make a plot of some of the derivatives, set parameter plot_or_write2file to string 'plot1', 
     to make a plot of the derivatives and their relative difference from each other, set plot_or_write2file to 'plot2',
     else it will write the derivatives to a file.
-
     central_params should be a list of the central values used for each parameter specified above, in the order:
     omega_b, sum neutrino masses, H0, omega_CDM, As, sigmag*h, bg, rg, sigmau*h.
-
     Assume N_ur central value is always 0.00641. (such that N_eff = 3.046.)
-
     kmin and kmax are the next parameters - min. and max. values for power spectrum
-
     num_k_points - number of k values used
-
     num_mus - number of points mu (where mu is the cosine of the angle between the observers line of site and the 
     k space vector) between 0 and 1 to compute the derivatives at 
-
     da - size of step in scalefactor when computing the growth rate (involves a derivative of the 
     power spectrum w.r.t. to scalefactor)
-
     neutrino_hier - options are only set it to 'inverted' or 'normal' hierarchy for neutrinos - any other string gives a degenerate hierarchy
-
     lin_or_nonlin - setting this to 'linear' will get the linear matter power spectrum from CLASS (in which case it is 
     exactly equal to the velocity-velocity and galaxy-velocity spectra) where as setting it to 'nonlinear' 
     will retrieve the HALOFIT power spectrum from CLASS
-
     The derivatives of the power spectra also take into account the Alcock-Paczynski Effect where relevant.  
      
     The central values of all central parameters are taken to be the users 'fiducial' cosmological parameters
     which are equivalent to the true cosmology (thus the distortion parameters/ratios are all equal to one). If the 
     true and fiducial cosmological parameters are not the same then the distortion parameters differ from one, and the 
     fiducial values of k and mu differ to the real values of k and mu.
-
     The derivatives take into account how mu and k change with respect to changing the real cosmology compared to the 
     fiducial cosmological parameters (which stay constant).
-
     """
 
     if P > 3 or P <= 0:
@@ -1032,6 +1062,8 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
         param_variation = np.linspace(As_central-delta_max_param, As_central+delta_max_param, num_steps)
     elif o == 10: #N_eff
         param_variation = np.linspace(-delta_max_param, delta_max_param, num_steps)
+    elif o == 11: #n_s
+        param_variation = np.linspace(ns-delta_max_param, ns+delta_max_param, num_steps)
     
     else:
         print('Parameter chosen is not an option (in derivative_power_spectra()).')
@@ -1086,6 +1118,7 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
     sigmau = sigmau_central/h # MPC     
     N_eff_deviation = 0.0 
     delta_mnu_max = 0.0
+    ns_val = ns 
 
     # calculate power spectrum while varying parameter of choice
     for i in np.arange(num_steps): 
@@ -1116,6 +1149,8 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
             As = param_variation[i]
         elif o == 10:
             N_eff_deviation = param_variation[i]
+        elif o == 11:
+            ns_val = param_variation[i]
 
         # get omega_m
         omegam = (Obh + Och + (mnu/93.14))/(h**2)
@@ -1123,12 +1158,12 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
         
         
         Pk_cb, ks, mus = run_class(Obh, Och, H0, As, mnu, neutrino_hier, [z], kmin_fiducial, kmax_fiducial, num_k_points, dm2_atm, dm2_sol,
-        delta_mnu_max, mnu_central, kspaceoption, tau, ns, Obh_central, Och_central, H0_central, As_central, mnu_central, mus_fiducial, lin_or_nonlin,
+        delta_mnu_max, mnu_central, kspaceoption, tau, ns_val, Obh_central, Och_central, H0_central, As_central, mnu_central, mus_fiducial, lin_or_nonlin,
         N_eff_deviation)
 
 
         f = growth_rate(Obh, Och, H0, As, mnu, neutrino_hier, z, kmin_fiducial, kmax_fiducial, num_k_points, da, linear, dm2_atm, dm2_sol,
-        delta_mnu_max, mnu_central, kspaceoption, tau, ns, Obh_central, Och_central, H0_central, As_central, mnu_central, mus_fiducial,
+        delta_mnu_max, mnu_central, kspaceoption, tau, ns_val, Obh_central, Och_central, H0_central, As_central, mnu_central, mus_fiducial,
         N_eff_deviation)[0]
 
 
@@ -1186,7 +1221,7 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
     # --------------------------------------------------------------------------------------- 
 
     # get derivatives with just simple central difference method for matter power spectrum 
-    if o < 5 or o == 9 or o == 10: # derivatives are zero if the varied paramater is not a cosmological parameter
+    if o < 5 or o == 9 or o == 10 or o == 11: # derivatives are zero if the varied paramater is not a cosmological parameter
         for j in np.arange((int((num_steps-1)/2))):
             matter_central_diffs[j,:,:] = (matter_power_spectrum_arr[num_steps-1-j,:] 
             - matter_power_spectrum_arr[j,:,:])/(2.0*deltas[num_steps-2-j])
@@ -1224,6 +1259,7 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
     omegam = ( Obh_central + Och_central + (mnu_central/93.14) )/(hsqrd)
     N_eff_deviation = 0
     delta_mnu_max = 0.0
+    ns_val = ns 
     if o == 2:
         delta_mnu_max = delta_max_param
 
@@ -1236,7 +1272,7 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
 
         stepsize = deltas[num_steps-2-i] 
         
-        df_dx = 0
+        df_dx = np.zeros((num_mus, num_k_points))
         F = 1.0
         dF_dx = 0.0 
         q_perp = 1.0
@@ -1244,12 +1280,19 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
         dq_perp_dx = 0.0  
         dq_para_dx = 0.0
 
-        if o < 5 or o == 9: # varying cosmological parameter x = non-zero df_dx 
+
+        if o < 5 or o == 9 or o == 13 or o == 10: # varying cosmological parameter x = non-zero df_dx 
             # getting derivative of the growth rate w.r.t. parameter being varied
-            df_dx = derivative_growth_rate(o, stepsize, Obh, Och, H0, As, mnu, neutrino_hier, 
-            z, kmin_fiducial, kmax_fiducial, num_k_points, da, linear, dm2_atm, dm2_sol, delta_mnu_max, 
-            mnu_central, kspaceoption, tau, ns, Obh_central, Och_central, H0_central, As_central, mnu_central,
-            mus_fiducial, N_eff_deviation)
+            if o < 5 or o == 9:
+                df_dx = derivative_growth_rate(o, stepsize, Obh, Och, H0, As, mnu, neutrino_hier, 
+                z, kmin_fiducial, kmax_fiducial, num_k_points, da, linear, dm2_atm, dm2_sol, delta_mnu_max, 
+                mnu_central, kspaceoption, tau, ns, Obh_central, Och_central, H0_central, As_central, mnu_central,
+                mus_fiducial, N_eff_deviation)
+            elif o == 10 or o == 13:
+                df_dx[:,:] = derivative_growth_rate(o, stepsize, Obh, Och, H0, As, mnu, neutrino_hier, 
+                z, kmin_fiducial, kmax_fiducial, num_k_points, da, linear, dm2_atm, dm2_sol, delta_mnu_max, 
+                mnu_central, kspaceoption, tau, ns, Obh_central, Och_central, H0_central, As_central, mnu_central,
+                mus_fiducial, N_eff_deviation)
             if o < 5:
                 dF_dx = dF_distortion_dx(o, F, H0, z, omegam)
                 Om_f = (Obh_central + Och_central + mnu_central/93.14)/(h**2)
@@ -1266,33 +1309,32 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
 
         for muu in np.arange(len(mus_fiducial)): 
 
-            if o != 10:
 
+            dk_r_dx = 0
+            dmu_r_dx = 0
+                
+            if o < 5:
+                dk_r_dx = dk_real_dx(o, dF_dx, dq_perp_dx, mus_fiducial[muu], ks_fiducial, F, q_perp, q_parallel)
+                dmu_r_dx =dmu_real_dx(dF_dx, mus_fiducial[muu], F, o, q_parallel, q_perp, ks_fiducial)
+                    
+            else:
                 dk_r_dx = 0
                 dmu_r_dx = 0
                 
-                if o < 5:
-                    dk_r_dx = dk_real_dx(o, dF_dx, dq_perp_dx, mus_fiducial[muu], ks_fiducial, F, q_perp, q_parallel)
-                    dmu_r_dx =dmu_real_dx(dF_dx, mus_fiducial[muu], F, o, q_parallel, q_perp, ks_fiducial)
-                    
-                else:
-                    dk_r_dx = 0
-                    dmu_r_dx = 0
+            if P == 1:
+                results_findiff_semi_analytic_derivatives[i, muu, :] = dP_gg_dx(o, bg, rg, growth_rates_arr[3, muu, :], df_dx[muu,:],
+                mus_real_arr[3,muu], ks_real_arr[3, muu, :], sigmag, matter_power_spectrum_arr[3,muu,:], matter_central_diffs[i, muu,:],
+                z, H0, dmu_r_dx, dk_r_dx, q_parallel, q_perp, dq_para_dx, dq_perp_dx)
                 
-                if P == 1:
-                    results_findiff_semi_analytic_derivatives[i, muu, :] = dP_gg_dx(o, bg, rg, growth_rates_arr[3, muu, :], df_dx[muu,:],
-                    mus_real_arr[3,muu], ks_real_arr[3, muu, :], sigmag, matter_power_spectrum_arr[3,muu,:], matter_central_diffs[i, muu,:],
-                    z, H0, dmu_r_dx, dk_r_dx, q_parallel, q_perp, dq_para_dx, dq_perp_dx)
-                
-                if P == 2:
-                    results_findiff_semi_analytic_derivatives[i, muu, :] = dP_gu_dx(o, bg, rg, growth_rates_arr[3,muu,:], df_dx[muu,:], 
-                    mus_real_arr[3,muu], ks_real_arr[3,muu,:], sigmag, sigmau, matter_power_spectrum_arr[3, muu, :], 
-                    matter_central_diffs[i, muu, :], H0, z, omegam, 1.0-omegam, dk_r_dx, dmu_r_dx, q_parallel, q_perp, dq_para_dx, dq_perp_dx)
+            if P == 2:
+                results_findiff_semi_analytic_derivatives[i, muu, :] = dP_gu_dx(o, bg, rg, growth_rates_arr[3,muu,:], df_dx[muu,:], 
+                mus_real_arr[3,muu], ks_real_arr[3,muu,:], sigmag, sigmau, matter_power_spectrum_arr[3, muu, :], 
+                matter_central_diffs[i, muu, :], H0, z, omegam, 1.0-omegam, dk_r_dx, dmu_r_dx, q_parallel, q_perp, dq_para_dx, dq_perp_dx)
                     
-                if P == 3:
-                    results_findiff_semi_analytic_derivatives[i, muu, :] = dP_uu_dx(o, mus_real_arr[3, muu], ks_real_arr[3, muu, :], 
-                    growth_rates_arr[3,muu,:], df_dx[muu,:], sigmau, matter_power_spectrum_arr[3, muu, :], matter_central_diffs[i, muu, :],
-                    H0, z, omegam, 1.0-omegam, dk_r_dx, dmu_r_dx, q_parallel, q_perp, dq_para_dx, dq_perp_dx)
+            if P == 3:
+                results_findiff_semi_analytic_derivatives[i, muu, :] = dP_uu_dx(o, mus_real_arr[3, muu], ks_real_arr[3, muu, :], 
+                growth_rates_arr[3,muu,:], df_dx[muu,:], sigmau, matter_power_spectrum_arr[3, muu, :], matter_central_diffs[i, muu, :],
+                H0, z, omegam, 1.0-omegam, dk_r_dx, dmu_r_dx, q_parallel, q_perp, dq_para_dx, dq_perp_dx)
 
 
 
@@ -1339,7 +1381,9 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
             if o == 9:
                 label = (r"$\Delta A_s=%.4f \times 10^{-9} $ - M1" %  (deltas[j]*1e9) ) 
             if o == 10:
-                label = (r"$\Delta N_{eff}=%.4f $ - M1" %  (deltas[j]) ) 
+                label = (r"$\Delta N_{eff}=3.046+%.4f $ - M1" %  (deltas[j]) ) 
+            if o == 11:
+                label = (r'$ \Delta n_s=%.4f $ - M1' % (deltas[j]) )
 
 
             dP_dtheta = results_findiff_derivatives[j, mu_indices[0], :]
@@ -1372,15 +1416,18 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
                 label = (r"$\Delta \sigma_{u}=%.3f $ - M2" %  (deltas[j]) ) 
             if o == 9:
                 label = (r"$\Delta A_s=%.4f \times 10^{-9} $ - M2" %  (deltas[j]*1e9) ) 
+            if o == 10:
+                label = (r"$\Delta N_{eff}=3.046+%.4f $ - M2" %  (deltas[j]) ) 
+            if o == 11:
+                label = (r'$ \Delta n_s=%.4f $ - M2' % (deltas[j]) )
 
-            if o != 10:
-
-                dP_dtheta = results_findiff_semi_analytic_derivatives[j, mu_indices[0], :]
-                ax1.semilogx(ks_fiducial, dP_dtheta, linestyle = '--', label = label )
-                dP_dtheta = results_findiff_semi_analytic_derivatives[j, mu_indices[1], :]
-                ax2.semilogx(ks_fiducial, dP_dtheta, linestyle = '--', label = label )
-                dP_dtheta = results_findiff_semi_analytic_derivatives[j, mu_indices[2], :]
-                ax3.semilogx(ks_fiducial, dP_dtheta, linestyle = '--', label = label )
+            
+            dP_dtheta = results_findiff_semi_analytic_derivatives[j, mu_indices[0], :]
+            ax1.semilogx(ks_fiducial, dP_dtheta, linestyle = '--', label = label )
+            dP_dtheta = results_findiff_semi_analytic_derivatives[j, mu_indices[1], :]
+            ax2.semilogx(ks_fiducial, dP_dtheta, linestyle = '--', label = label )
+            dP_dtheta = results_findiff_semi_analytic_derivatives[j, mu_indices[2], :]
+            ax3.semilogx(ks_fiducial, dP_dtheta, linestyle = '--', label = label )
 
 
         ylabels = [
@@ -1388,10 +1435,10 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
         r"$ \frac{dP(k, \mu)}{d\Omega_bh^2}$" , r"$ \frac{dP(k, \mu)}{d\Omega_{cdm}h^2}$", 
         r"$ \frac{dP(k, \mu)}{d\sigma_g}$", r"$ \frac{dP(k, \mu)}{db_g}$",
         r"$ \frac{dP(k, \mu)}{dr_g}$",r"$ \frac{dP(k, \mu)}{d\sigma_{u}}$" , r"$ \frac{dP(k, \mu)}{dA_s}$",
-        r"$ \frac{dP(k, \mu)}{dN_{eff}}$"
+        r"$ \frac{dP(k, \mu)}{dN_{eff}}$",'', '', r'$ \frac{dP(k, \mu)}{dn_s} $'
                   ]
 
-        xlabel = r"$k/h$ Mpc"
+        xlabel = r"$k (\mathrm{h Mpc})^{-1}$"
         ylabel = ylabels[o-1]
 
         # set up plot labels 
@@ -1421,7 +1468,8 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
         r"$r_g$ about $ 1 $",
         r"$\sigma_{u}$ about $\frac{13.0}{h}$ MPC",
         r"$A_s$ about $%.3f \times 10^{-9}$" % (As_central*1e9),
-        r'$N_{eff}$ about about 0.0'
+        r'$N_{eff}$ about 3.046',
+         '', '', r'$ n_s $ about %.4f' % (ns)
                               ]
 
         
@@ -1444,6 +1492,7 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
         results_findiff_derivatives /= (H0_central/100.0)**3 # putting into units of (MPC/h)^3/x
         results_findiff_semi_analytic_derivatives /= (H0_central/100.0)**3 # putting into units of (MPC/h)^3/x, x being the units of the parameter
         # that is being varied 
+        ks_fiducial /= (H0_central/100.0) # put ks into units of k/h MPC
 
         # getting mus we would like to plot 
         mu_indices = np.array(([np.argmin(np.abs(mus - 0.3)), np.argmin(np.abs(mus - 0.7))]))  
@@ -1496,7 +1545,9 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
             if o == 9:
                 label = (r"$\Delta A_s=%.4f \times 10^{-9} $," %  (deltas[j]*1e9) + " M1" ) 
             if o == 10:
-                label = (r"$\Delta N_{eff}=%.4f $" %  (deltas[j]) ) 
+                label = (r"$\Delta N_{eff}=3.046+%.4f $" %  (deltas[j]) ) 
+            if o == 11:
+                label = (r'$ \Delta n_s=%.4f $' % (deltas[j]) )
 
 
             dP_dtheta = results_findiff_derivatives[j, mu_indices[0], :]
@@ -1540,40 +1591,42 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
                 label = (r"$\Delta \sigma_{u}=%.3f $," %  (deltas[j]) + " M2" ) 
             if o == 9:
                 label = (r"$\Delta A_s=%.4f \times 10^{-9} $," %  (deltas[j]*1e9) + " M2" ) 
-            if o != 10:
+            if o == 10:
+                label = (r"$\Delta N_{eff}=3.046+%.4f $" %  (deltas[j]) ) 
+            if o == 11:
+                label = (r'$ \Delta n_s=%.4f $' % (deltas[j]) )
 
-
-                dP_dtheta = results_findiff_semi_analytic_derivatives[j, mu_indices[0], :]
+            dP_dtheta = results_findiff_semi_analytic_derivatives[j, mu_indices[0], :]
                 
-                #ax.semilogx(ks_fiducial, abs(dP_dtheta-dP_dtheta0_mu1)/dP_dtheta0_mu1, label = label+r", $ \mu = %.2f $" % mus[mu_indices[0]], color = colors[count])
-                ax.semilogx(ks_fiducial, abs(dP_dtheta-dP_dtheta0_mu1)/dP_dtheta0_mu1, label = label, color = colors[count])
-                #ax1.semilogx(ks_fiducial, dP_dtheta, label = label+r", $ \mu = %.2f $" % mus[mu_indices[0]], color = colors[count] )
-                ax1.semilogx(ks_fiducial, dP_dtheta, label = label, color = colors[count] )
-                count += 1
+            #ax.semilogx(ks_fiducial, abs(dP_dtheta-dP_dtheta0_mu1)/dP_dtheta0_mu1, label = label+r", $ \mu = %.2f $" % mus[mu_indices[0]], color = colors[count])
+            ax.semilogx(ks_fiducial, abs(dP_dtheta-dP_dtheta0_mu1)/dP_dtheta0_mu1, label = label, color = colors[count])
+            #ax1.semilogx(ks_fiducial, dP_dtheta, label = label+r", $ \mu = %.2f $" % mus[mu_indices[0]], color = colors[count] )
+            ax1.semilogx(ks_fiducial, dP_dtheta, label = label, color = colors[count] )
+            count += 1
 
 
-                dP_dtheta = results_findiff_semi_analytic_derivatives[j, mu_indices[1], :]
+            dP_dtheta = results_findiff_semi_analytic_derivatives[j, mu_indices[1], :]
 
-                #ax.semilogx(ks_fiducial, abs(dP_dtheta-dP_dtheta0_mu2)/dP_dtheta0_mu2, linestyle = '-.', label = label+r", $ \mu = %.2f $" % mus[mu_indices[1]], color = colors[count])
-                ax.semilogx(ks_fiducial, abs(dP_dtheta-dP_dtheta0_mu2)/dP_dtheta0_mu2, linestyle = '-.', label = label, color = colors1[count1])
-                #ax1.semilogx(ks_fiducial, dP_dtheta, linestyle = '-.', label = label+r", $ \mu = %.2f $" % mus[mu_indices[1]], color = colors[count] )
-                ax1.semilogx(ks_fiducial, dP_dtheta, linestyle = '-.', label = label, color = colors1[count1] )
-                count1 += 1
+            #ax.semilogx(ks_fiducial, abs(dP_dtheta-dP_dtheta0_mu2)/dP_dtheta0_mu2, linestyle = '-.', label = label+r", $ \mu = %.2f $" % mus[mu_indices[1]], color = colors[count])
+            ax.semilogx(ks_fiducial, abs(dP_dtheta-dP_dtheta0_mu2)/dP_dtheta0_mu2, linestyle = '-.', label = label, color = colors1[count1])
+            #ax1.semilogx(ks_fiducial, dP_dtheta, linestyle = '-.', label = label+r", $ \mu = %.2f $" % mus[mu_indices[1]], color = colors[count] )
+            ax1.semilogx(ks_fiducial, dP_dtheta, linestyle = '-.', label = label, color = colors1[count1] )
+            count1 += 1
 
 
 
-        ylabels = [
-        r"$ \frac{\Delta \frac{dP(k, \mu)}{dH_0}}{\frac{dP(k, \mu)}{dH_0}}$",
-        r"$ \frac{\Delta \frac{dP(k, \mu)}{d\sum m_{\nu} }}{\frac{dP(k, \mu)}{d\sum m_{\nu} }}$",
-        r"$ \frac{\Delta \frac{dP(k, \mu)}{d\Omega_bh^2}}{\frac{dP(k, \mu)}{d\Omega_bh^2}}$",
-        r"$ \frac{\Delta \frac{dP(k, \mu)}{d\Omega_{cdm}h^2}}{\frac{dP(k, \mu)}{d\Omega_{cdm}h^2}}$",
-        r"$ \frac{\Delta \frac{dP(k, \mu)}{d\sigma_g}}{\frac{dP(k, \mu)}{d\sigma_g}}$",
-        r"$ \frac{\Delta \frac{dP(k, \mu)}{db_g}}{\frac{dP(k, \mu)}{db_g}}$",
-        r"$ \frac{\Delta \frac{dP(k, \mu)}{dr_g}}{\frac{dP(k, \mu)}{dr_g}}$",
-        r"$ \frac{\Delta \frac{dP(k, \mu)}{d\sigma_{u}}}{\frac{dP(k, \mu)}{d\sigma_{u}}}$",
-        r"$ \frac{\Delta \frac{dP(k, \mu)}{dA_s}}{\frac{dP(k, \mu)}{dA_s}}$",
-        r"$ \frac{\Delta \frac{dP(k, \mu)}{dN_{eff}}}{\frac{dP(k, \mu)}{dN_{eff}}} $"
-                  ]
+        # ylabels = [
+        # r"$ \frac{\Delta \frac{dP(k, \mu)}{dH_0}}{\frac{dP(k, \mu)}{dH_0}}$",
+        # r"$ \frac{\Delta \frac{dP(k, \mu)}{d\sum m_{\nu} }}{\frac{dP(k, \mu)}{d\sum m_{\nu} }}$",
+        # r"$ \frac{\Delta \frac{dP(k, \mu)}{d\Omega_bh^2}}{\frac{dP(k, \mu)}{d\Omega_bh^2}}$",
+        # r"$ \frac{\Delta \frac{dP(k, \mu)}{d\Omega_{cdm}h^2}}{\frac{dP(k, \mu)}{d\Omega_{cdm}h^2}}$",
+        # r"$ \frac{\Delta \frac{dP(k, \mu)}{d\sigma_g}}{\frac{dP(k, \mu)}{d\sigma_g}}$",
+        # r"$ \frac{\Delta \frac{dP(k, \mu)}{db_g}}{\frac{dP(k, \mu)}{db_g}}$",
+        # r"$ \frac{\Delta \frac{dP(k, \mu)}{dr_g}}{\frac{dP(k, \mu)}{dr_g}}$",
+        # r"$ \frac{\Delta \frac{dP(k, \mu)}{d\sigma_{u}}}{\frac{dP(k, \mu)}{d\sigma_{u}}}$",
+        # r"$ \frac{\Delta \frac{dP(k, \mu)}{dA_s}}{\frac{dP(k, \mu)}{dA_s}}$",
+        # r"$ \frac{\Delta \frac{dP(k, \mu)}{dN_{eff}}}{\frac{dP(k, \mu)}{dN_{eff}}} $"
+        #           ]
 
 
         ylabels = [
@@ -1586,7 +1639,8 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
         r"% diff. $ \frac{dP(k, \mu)}{dr_g}$",
         r"% diff. $ \frac{dP(k, \mu)}{d\sigma_{u}}$" , 
         r"% diff. $ \frac{dP(k, \mu)}{dA_s}$",
-        r"% diff. $ \frac{dP(k, \mu)}{dN_{eff}}$"
+        r"% diff. $ \frac{dP(k, \mu)}{dN_{eff}}$", '', '',
+        r"% diff. $ \frac{dP(k, \mu)}{dn_s}$"
         ]
 
 
@@ -1595,31 +1649,32 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
         r"$ \frac{dP(k, \mu)}{d\Omega_bh^2}$" , r"$ \frac{dP(k, \mu)}{d\Omega_{cdm}h^2}$", 
         r"$ \frac{dP(k, \mu)}{d\sigma_g}$", r"$ \frac{dP(k, \mu)}{db_g}$",
         r"$ \frac{dP(k, \mu)}{dr_g}$",r"$ \frac{dP(k, \mu)}{d\sigma_{u}}$" , r"$ \frac{dP(k, \mu)}{dA_s}$",
-        r"$ \frac{dP(k, \mu)}{dN_{eff}}$"
+        r"$ \frac{dP(k, \mu)}{dN_{eff}}$", '', '',
+        r"$ \frac{dP(k, \mu)}{dn_s}$"
                   ]
 
 
-        xlabel = r"$k/h$ Mpc"
+        xlabel = r"$k (\mathrm{h Mpc})^{-1}$"
         ylabel = ylabels[o-1]
         ylabelax1 = ylabelsax1[o-1]
 
 
-        ax.set_xlim([0.0015, 0.2])
-        ax.set_xlabel(xlabel, fontsize = 18)
-        ax.set_ylabel(ylabel, fontsize = 18)
-        ax.tick_params(axis='both', which='major', labelsize=14)
-        ax.tick_params(axis='both', which='minor', labelsize=14)
+        ax.set_xlim([np.min(ks_fiducial), np.max(ks_fiducial)])
+        ax.set_xlabel(xlabel, fontsize = 17)
+        ax.set_ylabel(ylabel, fontsize = 17)
+        ax.tick_params(axis='both', which='major', labelsize=17)
+        ax.tick_params(axis='both', which='minor', labelsize=17)
         
         ax1.legend(loc = 'upper right', fontsize = 12, ncol = 1)#, bbox_to_anchor = (-1.5, 0.5))
         #ax1.axhline(0.0, linestyle = '--', color = 'k')
 
-        ax1.set_xlim([0.0015, 0.2])
+        ax1.set_xlim([np.min(ks_fiducial), np.max(ks_fiducial)])
         ax1.set_xticks([])
         ax1.set_xticklabels([])
-        ax1.set_ylabel(ylabelax1, fontsize = 18)
-        ax1.tick_params(axis='both', which='major', labelsize=14)
-        ax1.tick_params(axis='both', which='minor', labelsize=14)
-        ax.set_ylim([-0.01, 0.01])
+        ax1.set_ylabel(ylabelax1, fontsize = 17)
+        ax1.tick_params(axis='both', which='major', labelsize=17)
+        ax1.tick_params(axis='both', which='minor', labelsize=17)
+        ax.set_ylim([-0.05, 0.05])
 
         ax1.yaxis.set_major_formatter(mtick.FormatStrFormatter('%.2e'))
         #ax.yaxis.set_major_formatter(mtick.FormatStrFormatter('%.2e'))
@@ -1637,7 +1692,7 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
         r"$r_g$ about $ 1 $",
         r"$\sigma_{u}$ about $\frac{13.0}{h}$ MPC",
         r"$A_s$ about $%.3f \times 10^{-9}$" % (As_central*1e9),
-        r"$N_{eff}$ about 0.0"
+        r"$N_{eff}$ about 3.046", '', '', r'$ n_s $ about %.4f ' % (ns)
                               ]
 
         
@@ -1658,7 +1713,7 @@ lin_or_nonlin, kspaceoption, tau, ns, dm2_atm = 2.5e-3, dm2_sol = 7.6e-5):
     else: # write the derivatives results to a file
 
         spectra = ['GG', 'GU', 'UU']
-        parameters = ['H0', 'mnu', 'ombh2', 'omch2', 'sigg', 'b', 'r', 'sigmau', 'As' ]
+        parameters = ['H0', 'mnu', 'ombh2', 'omch2', 'sigg', 'b', 'r', 'sigmau', 'As', 'Neff', 'ns' ]
 
         if o != 5 or o != 8 or o != 9:
 
@@ -1905,9 +1960,7 @@ mu_s_fid, d_a, neutrino_hier, lin_or_nonlin, kspaceoption, tau, ns, N_eff_deviat
     Quickly computes dP_xx_dy for a single parameter y for all redshift space power spectra,
     for any number of z, k and mu and returns a 3D array (for each RSPS)
     with the derivatives. ks and mus are also returned.
-
     mu_s_fid and zed_list MUST be a list, even for a single z or mu value.
-
     This function may still take a while to run if the number of redshifts and mus is long.
     '''
     
@@ -1935,6 +1988,8 @@ mu_s_fid, d_a, neutrino_hier, lin_or_nonlin, kspaceoption, tau, ns, N_eff_deviat
     sigmau = sigmauh/h
     delta_mnu_max = 0.0
     N_eff_deviation = 0.0
+    ns_val = ns 
+
 
     param_variation = [] # initialising an object that will store the values of our parameter we vary
     
@@ -1950,6 +2005,8 @@ mu_s_fid, d_a, neutrino_hier, lin_or_nonlin, kspaceoption, tau, ns, N_eff_deviat
         param_variation = np.linspace(As_central-delta_param, As_central+delta_param, 2)
     elif o == 10: # N_eff
         param_variation = np.linspace(-delta_param, delta_param, 2)
+    elif o == 11: # ns
+        param_variation = np.linspace(ns-delta_param, ns+delta_param, 2)
     else:
         raise Exception('Parameter chosen is not an option. (get_rsp_dP_dx_cosmo_many_redshifts()) ')
 
@@ -2002,19 +2059,20 @@ mu_s_fid, d_a, neutrino_hier, lin_or_nonlin, kspaceoption, tau, ns, N_eff_deviat
             As = param_variation[i]
         elif o == 10:
             N_eff_deviation = param_variation[i]
-
+        elif o == 11: # ns 
+            ns_val = param_variation[i]
         # get omega_m
         omegam = (Obh + Och + (mnu/93.14))/(h**2)
 
 
         Pk_cb, ks_r, mus_r = run_class(Obh, Och, H0, As, mnu, neutrino_hier, zed_list, kmin_fid, 
-        kmax_fid, num_k_points, dm2_atm, dm2_sol, delta_mnu_max, mnu_central, kspaceoption, tau, ns, 
+        kmax_fid, num_k_points, dm2_atm, dm2_sol, delta_mnu_max, mnu_central, kspaceoption, tau, ns_val, 
         Obh_central, Och_central, H0_central, As_central, mnu_central, mu_s_fid, lin_or_nonlin, N_eff_deviation)
             
 
         f = compute_f_at_many_redshifts(Obh, Och, H0, As, mnu, neutrino_hier, zed_list, kmin_fid, kmax_fid, mu_s_fid, 
         num_k_points, d_a, linear, mnu_central, Obh_central, Och_central, H0_central, As_central, mnu_central, 
-        kspaceoption, tau, ns, N_eff_deviation, delta_mnu_max=delta_mnu_max)[0]
+        kspaceoption, tau, ns_val, N_eff_deviation, delta_mnu_max=delta_mnu_max)[0]
             
 
         if Pk_cb.shape == (len(mu_s_fid), num_k_points, len(zed_list)) and ks_r.shape == (len(mu_s_fid), num_k_points, len(zed_list)) and mus_r.shape == (len(mu_s_fid), len(zed_list)) and f.shape == (len(mu_s_fid), num_k_points, len(zed_list)):
@@ -2103,27 +2161,26 @@ mu_s_fid, d_a, neutrino_hier, lin_or_nonlin, kspaceoption, tau, ns, N_eff_deviat
 #--------------------------------------------------------------------------------------------------------------------------------------
 
 
-#if __name__ == "__main__":
+if __name__ == "__main__":
 
-    # baryons, neutrinos, H0, CDM, As, sigmag*h, rg, bg, sigmau*h, f0
-    # Obh = 0.022383
-    # Och = 0.12011
-    # H0 = 67.32
-    # h = H0/100.0
-    # As = 2.10058e-9
-    # sigmagh = 4.24
-    # sigmauh = 13.0
-    # mnu = 0.058
-    # r = 1.0
-    # b = 1.0
-    # f0 = 1.0
-    # params = [Obh, mnu, H0, Och, As, sigmagh, b, r, sigmagh]
-    # zval = 0.0
-    # tau = 0.092
-    # ns = 0.996
-
-    # dm2_atm = 2.5e-3
-    # dm2_sol = 7.6e-5
+    #baryons, neutrinos, H0, CDM, As, sigmag*h, rg, bg, sigmau*h, f0
+    Obh = 0.022383
+    Och = 0.12011
+    H0 = 67.32
+    h = H0/100.0
+    As = 2.10058e-9
+    sigmagh = 4.24
+    sigmauh = 13.0
+    mnu = 0.058
+    r = 1.0
+    b = 1.0
+    f0 = 1.0
+    params = [Obh, mnu, H0, Och, As, sigmagh, b, r, sigmagh]
+    zval = 0.0
+    tau = 0.092
+    ns = 0.996
+    dm2_atm = 2.5e-3
+    dm2_sol = 7.6e-5
 
     # pk_neff1 = run_class(Obh, Och, H0, As, mnu, 'normal', [0.0], 1e-3, 1.0, 
     # 100, dm2_atm, dm2_sol, 0.0, mnu, 'log', tau, ns, Obh, Och,
@@ -2151,7 +2208,7 @@ mu_s_fid, d_a, neutrino_hier, lin_or_nonlin, kspaceoption, tau, ns, N_eff_deviat
     # H0 = 1, neutrinos = 2, baryons = 3, CDM = 4, sigmag = 5, bg = 6, rg = 7, sigmau = 8, As = 9
    
     # H0 
-    #derivative_power_spectra(1, 1, 0.0, 'plot2', params, 0.54, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    #derivative_power_spectra(11, 1, 0.0, 'plot2', params, 0.01, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
     # mnu
     #derivative_power_spectra(2, 1, 0.0, 'plot2', params, 0.0025, 1.0e-4, 1.0, 2000, 100, 0.0001, 'inverted', 'linear', 'log', tau, ns)
     # Obh   
