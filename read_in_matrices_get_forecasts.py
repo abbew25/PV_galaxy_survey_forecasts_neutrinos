@@ -1,4 +1,3 @@
-
 # Author: Abbe Whitford 
 
 # script to read in fisher matrices and get correct forecast
@@ -50,6 +49,7 @@ def get_Planck18_MCMC(Data_list, MCMC_chains_option):
     As___index = 42+2
     ws___index = 0
     Neff_index = 5+2
+    ns___index = 7+2
 
     chain1 = ''
     chain2 = ''
@@ -66,6 +66,8 @@ def get_Planck18_MCMC(Data_list, MCMC_chains_option):
         H0___index = 28+2
         As___index = 42+2
         ws___index = 0
+        ns___index = 6+2
+
 
         chain1 = pd.read_csv((cwd + r'/Planck_files/base_mnu/plikHM_TTTEEE_lowl_lowE/base_mnu_plikHM_TTTEEE_lowl_lowE_1.txt'), 
         sep="    ", header=None, engine = 'python')
@@ -85,6 +87,8 @@ def get_Planck18_MCMC(Data_list, MCMC_chains_option):
             H0___index = 29+2
             As___index = 43+2
             Neff_index = 5+2
+            ns___index = 7+2
+
 
             chain1 = pd.read_csv((cwd + r'/Planck_files/base_mnu_nnu/plikHM_TTTEEE_lowl_lowE/base_nnu_mnu_plikHM_TTTEEE_lowl_lowE_1.txt'), 
             sep="    ", header=None, engine = 'python')
@@ -104,6 +108,8 @@ def get_Planck18_MCMC(Data_list, MCMC_chains_option):
         H0___index = 28+2
         As___index = 42+2
         ws___index = 0
+        ns___index = 6+2
+
 
         chain1 = pd.read_csv((cwd + r'/Planck_files/base_mnu/plikHM_TTTEEE_lowl_lowE_lensing/base_mnu_plikHM_TTTEEE_lowl_lowE_lensing_1.txt'), 
         sep="    ", header=None, engine = 'python')
@@ -123,6 +129,7 @@ def get_Planck18_MCMC(Data_list, MCMC_chains_option):
             H0___index = 29+2
             As___index = 43+2
             Neff_index = 5+2
+            ns___index = 7+2
 
             chain1 = pd.read_csv((cwd + r'/Planck_files/base_mnu_nnu/plikHM_TTTEEE_lowl_lowE/base_nnu_mnu_plikHM_TTTEEE_lowl_lowE_1.txt'), 
             sep="    ", header=None, engine = 'python')
@@ -149,6 +156,7 @@ def get_Planck18_MCMC(Data_list, MCMC_chains_option):
     chain_Mnu_ = np.concatenate((chain1[Mnu__index], chain2[Mnu__index], chain3[Mnu__index], chain4[Mnu__index]))
     chain_A_s_ = np.concatenate((chain1[As___index], chain2[As___index], chain3[As___index], chain4[As___index]))*1e-9
     chain_Neff = np.concatenate((chain1[Neff_index], chain2[Neff_index], chain3[Neff_index], chain4[Neff_index]))
+    chain_ns__ = np.concatenate((chain1[ns___index], chain2[ns___index], chain3[ns___index], chain4[ns___index]))
 
     weights1 = chain1[ws___index]
     weights2 = chain2[ws___index]
@@ -163,7 +171,7 @@ def get_Planck18_MCMC(Data_list, MCMC_chains_option):
 
     for count, item in enumerate(Data_list):
 
-        if item == 0 or item == 1 or item == 2 or item == 3 or item == 4 or item == 13:
+        if item == 0 or item == 1 or item == 2 or item == 3 or item == 4 or item == 13 or item == 14:
             chains_param_indices.append(item)
 
         if count == 0:
@@ -179,6 +187,8 @@ def get_Planck18_MCMC(Data_list, MCMC_chains_option):
                 chains_all = chain_Mnu_
             elif item == 13:
                 chains_all = chain_Neff
+            elif item == 14:
+                chains_all = chain_ns__
             else:
                 continue
         else:
@@ -194,6 +204,8 @@ def get_Planck18_MCMC(Data_list, MCMC_chains_option):
                 chains_all = np.vstack((chains_all, chain_Mnu_))
             elif item == 13:
                 chains_all = np.vstack((chains_all, chain_Neff))
+            elif item == 14:
+                chains_all = np.vstack((chains_all, chain_ns__))
             else:
                 continue
 
@@ -202,7 +214,27 @@ def get_Planck18_MCMC(Data_list, MCMC_chains_option):
     # get the Fisher information for these chains from the covariance matrix 
     planck_18_info_matrix = np.linalg.inv(planck_18_cov_matrix)
 
-    return planck_18_info_matrix
+    # now need to add it to the full fisher information matrix for all parameters
+    # that vary in our analysis
+    planck_18_information = np.zeros((len(Data_list), len(Data_list)))
+    planck_18_information = np.matrix(planck_18_information)
+
+    for i in Data_list:
+        for j in Data_list:
+
+            # get the index of i and j in planck_18_information
+            indexii = Data_list.index(i)
+            indexjj = Data_list.index(j)
+
+            if i in chains_param_indices and j in chains_param_indices:
+                indexi = chains_param_indices.index(i)
+                indexj = chains_param_indices.index(j)
+                planck_18_information[indexii,indexjj] = planck_18_info_matrix[indexi, indexj]
+                
+            else:
+                planck_18_information[indexii,indexjj] = 0
+
+    return planck_18_information
     
   
 
@@ -210,7 +242,8 @@ def get_Planck18_MCMC(Data_list, MCMC_chains_option):
 
 # setting up information to read in  
 # A list of flags for the parameters we are interested in varying in the analysis/free parameters - comment out parameters you don't want
-# Ordering of parameters here is best and shouldn't be altered, just comment out lines for parameters that were not included in the forecasting analysis.
+# Ordering of parameters here is best and shouldn't be altered (cosmo parameters before nuisance parameters), 
+# just comment out lines for parameters that were not included in the forecasting analysis.
 
 Data = [                                        
 0,                # H0
@@ -219,6 +252,7 @@ Data = [
 3,                # Och
 4,                # mnu
 13,               # N_eff (effective number of neutrino species)  
+14,               # n_s (the spectral index)
 7,                # galaxy bias b_g
 #8,               # r_g 
 9,                # sigmau 
@@ -229,14 +263,14 @@ Data_list_cosmo_params = Data
 
 file_path_main = str(os.getcwd()) + '/example_results/'
 file_path = file_path_main + 'fisher_matrices_only_survey_info.txt' 
-number_free_params = 8 # total number of free parameters in each redshift bin (len(Data) in forecasting analysis) - user needs to set this 
-number_params_nueb = 6 # number of parameters that will be treated as the same parameter in all redshift bins (any cosmological parameters, and not nuisance parameters)
+number_free_params = 10 # total number of free parameters in each redshift bin (len(Data) in forecasting analysis) - user needs to set this 
+number_params_nueb = 7 # number of parameters that will be treated as the same parameter in all redshift bins (any cosmological parameters, and not nuisance parameters)
 num_unique_params = number_free_params - number_params_nueb
 num_redshift_bins = 5 # total number of matrices we will read in 
 include_Planck = True # do we want to get an estimate of the fisher information from Planck on cosmo parameters and add it to our fisher information?
 check_ill_conditioned = False  # do we want to check if the matrix is not symmetric or is ill-conditioned?
 print_fisher_matrix = False    # do we want to check the Fisher matrix?
-Planck_info_flag = 2           # flag for what information to include from Planck MCMC chains 
+Planck_info_flag = 1           # flag for what information to include from Planck MCMC chains 
                                # 1 = Planck PlikHM 2018 TTTEEE + lowE + lowl, 
                                # 2 = Planck PlikHM 2018 TTTEEE + lowE + lowl + lensing (no lensing if N_eff is free parameter though)     
 Neff_free = False 
@@ -281,8 +315,9 @@ if print_fisher_matrix:
 # now adding the Planck information 
 
 Planck_fisher_estimate = get_Planck18_MCMC(Data, Planck_info_flag)
-
-total_fisher[0:number_params_nueb, 0:number_params_nueb] += Planck_fisher_estimate
+Planck_fisher_estimate = shrink_sqr_matrix(Planck_fisher_estimate)
+if include_Planck:
+    total_fisher[0:number_params_nueb, 0:number_params_nueb] += Planck_fisher_estimate
     
 
 # get covariance matrix 
@@ -302,7 +337,7 @@ results_mnu = 'mnu error: ' + str(mnu_error) + ' eV, % error: ' + str(mnu_per_er
 print(results_mnu)
 
 
-# now write the results to an appropriate file and location 
+# now write the results to an appropriate file location with a descriptive name
 # write the results to a file 
 if include_Planck:
     if include_lensing or Neff_free:
@@ -332,4 +367,3 @@ else: # No planck info included
 
     with open((file_path_main + 'fisher_final_no_planck.txt'), 'w') as f:
         print(total_fisher, file=f)  
-
