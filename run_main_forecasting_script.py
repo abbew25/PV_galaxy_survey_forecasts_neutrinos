@@ -12,8 +12,8 @@ import pickle
 #--------------------------------------------------------------------------------------------------------------------------------------
 
 
-include_Planck_base_LCDM_2018 = False           # set to True or False to include estimate of the Fisher information from Planck in forecast  
-plot_ellipses = False                           # plot confidence ellipses of sum of neutrino masses with each other parameter in Fisher matrix
+include_Planck_base_LCDM_2018 = True            # set to True or False to include estimate of the Fisher information from Planck in forecast  
+plot_ellipses = True                            # plot confidence ellipses of sum of neutrino masses with each other parameter in Fisher matrix
 write_data_to_files = True                      # writes the fisher matrix in each redshift bin and final covariance matrix to a file + other information relating to forecast.
 MCMC_chains_option = 2                          # flag for what information to include from Planck MCMC chains 
                                                 # 1 = Planck PlikHM 2018 TTTEEE + lowE + lowl, 
@@ -35,7 +35,7 @@ save_file_folder = str(os.getcwd()) + '/example_results/' # specify path for sav
 divide_by_h3_on_read_in = True                 # for number density files - is the number density of objects in h^3/Mpc^3? (true for example files)
 multiply_by_h3_on_read_in = False              # for number density files - is the number density of objects in 1/Mpc^3 * 1/h^3?
 multiply_by1eminus6_on_read_in = True          # for number density files - number densities in example files is multiplied by 1e6 to save precision
-
+                                               # set to True to mutiply by 1e-6 on read in of files 
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------
 #set up fiducial cosmological parameters and some other stuff: need to define H0, h, As, Obh, M_nu, Och, Om, tau and ns and the neutrino hierarchy 
@@ -80,7 +80,7 @@ del_As = 0.029*1e-10
 del_Och2 = 0.00015
 del_Mnu = 0.001
 del_Neff = 0.025
-
+del_ns = 0.01
 
 # other settings: 
 
@@ -91,11 +91,11 @@ zmin = 0.00                                     # minimum redshift to include in
 kmax = 0.2*h                                    # The maximum k mode to include information from in forecasting analysis
 kmin_overall = 0                                # don't change this - value of kmin_overall is determined later by forecasting script.
 kmin_overall_index = 0                          # don't alter this.
-numk_vals = 2000                                # number of k points to consider (optional)
+numk_vals = 1000                                # number of k points to consider (optional)
 
 # We need to know the independent survey area for our redshift and peculiar velocity surveys and then the area of overlap between the surveys 
 # (redshift survey area only first, then PV survey area only second, then overlap, in units of pi*steradians)
-survey_area = [1.3186, 0.0, 0.0] # DESI
+survey_area = [0.0, 0.0, 1.3186] 
 error_rand = 300.0                              # The observational error due to random non-linear velocities 
 error_dist = 0.20                               # The percentage error on the distance indicator (Typically 0.05 - 0.10 for SNe IA, 
                                                 # 0.2 or more for Tully-Fisher or Fundamental Plane) 
@@ -108,20 +108,21 @@ Data = [
 2,                # Obh
 3,                # Och
 4,                # mnu
-#13,               # N_eff (effective number of neutrino species)  
+13,               # N_eff (effective number of neutrino species)  
+14,               # ns
 7,                # galaxy bias b_g
-#8,               # r_g 
-#9,                # sigmau 
-10,               # sigmag                            
+#8,                # r_g 
+9,                # sigmau
+10,               # sigmag                          
         ] 
 
 
-nparams = len(Data)                             # The number of free parameters 
-verbosity = 1                                   # How much output to give: <= 0 only gives less information, > 0 gives more information
+nparams = len(Data)                             # The number of free parameters (don't alter this)
+verbosity = 1                                   # How much output to give: = 0 only gives less information, =1 gives more information
 dm2_atm = 2.5e-3                                # setting the atmospheric neutrino mass splitting (best not to alter this too much)
 dm2_sol = 7.45e-5                               # setting the solar neutrino mass splitting (best not to alter this too much)  
-num_mus = 100                                   # number of mus to use when integrating over mu in z_eff_integrand and mu_integrand (100 is usually good enough,
-                                                # a large number of mus may significantly slows down the code however)   
+num_mus = 100                                   # number of mus to use when integrating over mu in z_eff_integrand and mu_integrand with trapezoid rule 
+                                                # (100 is good enough, a large number of mus may significantly slows down the code)   
 
 
 
@@ -132,8 +133,10 @@ str(os.getcwd()) + r'/example_PV_number_densities.csv'        # number density o
 
 ]
 
-# DESI BGS with PV - names for writing power spectra data to files (if write_power_spectra_to_files = True)
-nbar_file_brev = ['exampleredshifts', 'examplePVs']
+# DESI BGS with PV - short names for density files being read in, 
+# to use when writing power spectra data to files (if write_power_spectra_to_files = True) so that one has reference to which
+# redshifts the power spectra were calculated for 
+nbar_file_brev = ['exampleredshifts', 'examplePVs'] 
 
 
 
@@ -173,6 +176,7 @@ forecasting_params = {
     'del_Och2': del_Och2,
     'del_Mnu': del_Mnu,
     'del_Neff': del_Neff,
+    'del_ns': del_ns,
     'lin_or_nonlin': lin_or_nonlin,
     'c': c,
     'num_redshift_bins': num_redshift_bins,                                         
@@ -204,4 +208,3 @@ call(["python", "main_PV_forecasts.py"])
 
 
 print('Finished running forecasts ')
-
