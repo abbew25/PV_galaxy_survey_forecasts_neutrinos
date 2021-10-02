@@ -1,4 +1,3 @@
-
 # import libraries
 import matplotlib.pyplot as plt 
 import numpy as np 
@@ -51,6 +50,7 @@ del_As = pickle.load( open('forecasting_params.p', 'rb') )['del_As']
 del_Och2 = pickle.load( open('forecasting_params.p', 'rb') )['del_Och2']
 del_Mnu = pickle.load( open('forecasting_params.p', 'rb') )['del_Mnu']
 del_Neff = pickle.load( open('forecasting_params.p', 'rb') )['del_Neff']
+del_ns = pickle.load( open('forecasting_params.p', 'rb') )['del_ns']
 lin_or_nonlin = pickle.load( open('forecasting_params.p', 'rb') )['lin_or_nonlin']
 c = pickle.load( open('forecasting_params.p', 'rb') )['c']
 num_redshift_bins = pickle.load( open('forecasting_params.p', 'rb') )['num_redshift_bins']                                             
@@ -64,7 +64,7 @@ survey_area = pickle.load( open('forecasting_params.p', 'rb') )['survey_area']
 error_rand = pickle.load( open('forecasting_params.p', 'rb') )['error_rand']
 error_dist = pickle.load( open('forecasting_params.p', 'rb') )['error_dist'] 
 Data = pickle.load( open('forecasting_params.p', 'rb') )['Data']
-nparams = pickle.load( open('forecasting_params.p', 'rb') )['nparams'] 
+nparams = len(Data)
 verbosity = pickle.load( open('forecasting_params.p', 'rb') )['verbosity']
 dm2_atm = pickle.load( open('forecasting_params.p', 'rb') )['dm2_atm']
 dm2_sol = pickle.load( open('forecasting_params.p', 'rb') )['dm2_sol']
@@ -83,14 +83,10 @@ pmm_0_kmin = 0.0
 
 N_redshifts_arr, N_bar_arr, r_array, delta_r_array, redshift_dist_spline = [], [], [], [], []
 
-dPdH_arr_gg, dPdObh2_arr_gg, dPdOch2_arr_gg, dPdMnu_arr_gg, dPdAs_arr_gg, dPdNeff_arr_gg  = [], [], [], [], [], []
-dPdH_arr_gu, dPdObh2_arr_gu, dPdOch2_arr_gu, dPdMnu_arr_gu, dPdAs_arr_gu, dPdNeff_arr_gu  = [], [], [], [], [], []
-dPdH_arr_uu, dPdObh2_arr_uu, dPdOch2_arr_uu, dPdMnu_arr_uu, dPdAs_arr_uu, dPdNeff_arr_uu  = [], [], [], [], [], []
+dPdH_arr_gg, dPdObh2_arr_gg, dPdOch2_arr_gg, dPdMnu_arr_gg, dPdAs_arr_gg, dPdNeff_arr_gg, dPdns_arr_gg  = [], [], [], [], [], [], []
+dPdH_arr_gu, dPdObh2_arr_gu, dPdOch2_arr_gu, dPdMnu_arr_gu, dPdAs_arr_gu, dPdNeff_arr_gu, dPdns_arr_gu  = [], [], [], [], [], [], []
+dPdH_arr_uu, dPdObh2_arr_uu, dPdOch2_arr_uu, dPdMnu_arr_uu, dPdAs_arr_uu, dPdNeff_arr_uu, dPdns_arr_uu  = [], [], [], [], [], [], []
 
-
-dP_dalpha_para_arr_gg, dP_dalpha_perp_arr_gg = [], []
-dP_dalpha_para_arr_gu, dP_dalpha_perp_arr_gu = [], []
-dP_dalpha_para_arr_uu, dP_dalpha_perp_arr_uu = [], []
 
 galaxy_bias_array = []
 
@@ -100,7 +96,7 @@ planck_18_information = []
 data_analysis_dictionary = {
         'kmax/h:': kmax/h,
         'central param vals:': [H0, As*1e9, Obh, Och, m_nu, r_g, b_g, sigma_gh, sigma_uh, ns, tau],
-        'step_sizes_cosmo:': [del_H0, del_As*1e9, del_Obh2, del_Och2, del_Mnu, del_Neff],
+        'step_sizes_cosmo:': [del_H0, del_As*1e9, del_Obh2, del_Och2, del_Mnu, del_Neff, del_ns],
         'linear or nonlinear:': lin_or_nonlin,
         '+ Planck data?:': data_from_MCMC_chains,
         'zmin, zmax:': [zmin, zmax],
@@ -168,6 +164,7 @@ def get_Planck18_MCMC(Data_list):
     As___index = 42+2
     ws___index = 0
     Neff_index = 5+2
+    ns___index = 7+2
 
     chain1 = ''
     chain2 = ''
@@ -184,6 +181,7 @@ def get_Planck18_MCMC(Data_list):
         H0___index = 28+2
         As___index = 42+2
         ws___index = 0
+        ns___index = 6+2
 
         chain1 = pd.read_csv((cwd + r'/Planck_files/base_mnu/plikHM_TTTEEE_lowl_lowE/base_mnu_plikHM_TTTEEE_lowl_lowE_1.txt'), 
         sep="    ", header=None, engine = 'python')
@@ -203,6 +201,7 @@ def get_Planck18_MCMC(Data_list):
             H0___index = 29+2
             As___index = 43+2
             Neff_index = 5+2
+            ns___index = 7+2
 
             chain1 = pd.read_csv((cwd + r'/Planck_files/base_mnu_nnu/plikHM_TTTEEE_lowl_lowE/base_nnu_mnu_plikHM_TTTEEE_lowl_lowE_1.txt'), 
             sep="    ", header=None, engine = 'python')
@@ -222,6 +221,7 @@ def get_Planck18_MCMC(Data_list):
         H0___index = 28+2
         As___index = 42+2
         ws___index = 0
+        ns___index = 6+2
 
         chain1 = pd.read_csv((cwd + r'/Planck_files/base_mnu/plikHM_TTTEEE_lowl_lowE_lensing/base_mnu_plikHM_TTTEEE_lowl_lowE_lensing_1.txt'), 
         sep="    ", header=None, engine = 'python')
@@ -241,6 +241,7 @@ def get_Planck18_MCMC(Data_list):
             H0___index = 29+2
             As___index = 43+2
             Neff_index = 5+2
+            ns___index = 7+2
 
             chain1 = pd.read_csv((cwd + r'/Planck_files/base_mnu_nnu/plikHM_TTTEEE_lowl_lowE/base_nnu_mnu_plikHM_TTTEEE_lowl_lowE_1.txt'), 
             sep="    ", header=None, engine = 'python')
@@ -267,6 +268,7 @@ def get_Planck18_MCMC(Data_list):
     chain_Mnu_ = np.concatenate((chain1[Mnu__index], chain2[Mnu__index], chain3[Mnu__index], chain4[Mnu__index]))
     chain_A_s_ = np.concatenate((chain1[As___index], chain2[As___index], chain3[As___index], chain4[As___index]))*1e-9
     chain_Neff = np.concatenate((chain1[Neff_index], chain2[Neff_index], chain3[Neff_index], chain4[Neff_index]))
+    chain_ns__ = np.concatenate((chain1[ns___index], chain2[ns___index], chain3[ns___index], chain4[ns___index]))
 
     weights1 = chain1[ws___index]
     weights2 = chain2[ws___index]
@@ -281,7 +283,7 @@ def get_Planck18_MCMC(Data_list):
 
     for count, item in enumerate(Data_list):
 
-        if item == 0 or item == 1 or item == 2 or item == 3 or item == 4 or item == 13:
+        if item == 0 or item == 1 or item == 2 or item == 3 or item == 4 or item == 13 or item == 14:
             chains_param_indices.append(item)
 
         if count == 0:
@@ -297,6 +299,8 @@ def get_Planck18_MCMC(Data_list):
                 chains_all = chain_Mnu_
             elif item == 13:
                 chains_all = chain_Neff
+            elif item == 14:
+                chains_all = chain_ns__
             else:
                 continue
         else:
@@ -312,6 +316,8 @@ def get_Planck18_MCMC(Data_list):
                 chains_all = np.vstack((chains_all, chain_Mnu_))
             elif item == 13:
                 chains_all = np.vstack((chains_all, chain_Neff))
+            elif item == 14:
+                chains_all = np.vstack((chains_all, chain_ns__))
             else:
                 continue
 
@@ -402,7 +408,6 @@ def read_nz():
     '''
     Read in the files to get the number density of galaxies for the density field
     and the velocity field. 
-
     This function also computes the distance to each redshift bin we consider, the width of the 
     distance bins and creates a spline for redshift with distance that can be used globally. 
     '''
@@ -519,9 +524,9 @@ def read_power():
     global pmm_array, pmt_array, ptt_array, growth_rate_array, galaxy_bias_array
 
                                                                                      
-    global dPdH_arr_gg, dPdObh2_arr_gg, dPdOch2_arr_gg, dPdMnu_arr_gg, dPdAs_arr_gg, dP_dalpha_para_arr_gg, dP_dalpha_perp_arr_gg, dPdNeff_arr_gg
-    global dPdH_arr_gu, dPdObh2_arr_gu, dPdOch2_arr_gu, dPdMnu_arr_gu, dPdAs_arr_gu, dP_dalpha_para_arr_gu, dP_dalpha_perp_arr_gu, dPdNeff_arr_gu
-    global dPdH_arr_uu, dPdObh2_arr_uu, dPdOch2_arr_uu, dPdMnu_arr_uu, dPdAs_arr_uu, dP_dalpha_para_arr_uu, dP_dalpha_perp_arr_uu, dPdNeff_arr_uu
+    global dPdH_arr_gg, dPdObh2_arr_gg, dPdOch2_arr_gg, dPdMnu_arr_gg, dPdAs_arr_gg, dPdNeff_arr_gg, dPdns_arr_gg
+    global dPdH_arr_gu, dPdObh2_arr_gu, dPdOch2_arr_gu, dPdMnu_arr_gu, dPdAs_arr_gu, dPdNeff_arr_gu, dPdns_arr_gu
+    global dPdH_arr_uu, dPdObh2_arr_uu, dPdOch2_arr_uu, dPdMnu_arr_uu, dPdAs_arr_uu, dPdNeff_arr_uu, dPdns_arr_uu
 
     # get the matter /velocity power spectra and growth rate etc. for all the redshifts we need
 
@@ -772,6 +777,31 @@ def read_power():
                 
                 pickle.dump( dictionary_2_store_derivatives, open(check_str, 'wb') )
 
+    if 14 in Data:
+
+        check_str = CCStr + '_' + 'delta_ns' + '_' + str(del_ns) + '_.p'
+
+        try:
+
+            dPdns_arr_gg = pickle.load( open(check_str, 'rb') )['dPdns_arr_gg']
+            dPdns_arr_gu = pickle.load( open(check_str, 'rb') )['dPdns_arr_gu']
+            dPdns_arr_uu = pickle.load( open(check_str, 'rb') )['dPdns_arr_uu']
+
+        except:
+
+
+            dPdns_arr_gg, dPdns_arr_gu, dPdns_arr_uu = cosmo.get_rsp_dP_dx_cosmo_many_redshifts(11, N_redshifts_arr, central_params, del_ns, k1, k2, 
+            numk_vals, mus, d_a, n_h, lin_or_nonlin, 'lin_ks', tau, ns, 0.0, dm2_atm, dm2_sol)[0:3]
+
+            
+            dictionary_2_store_derivatives = { 'dPdns_arr_gg': dPdns_arr_gg, 
+                                               'dPdns_arr_gu': dPdns_arr_gu,
+                                               'dPdns_arr_uu': dPdns_arr_uu  }
+
+            if write_power_spectra_to_files:
+                
+                pickle.dump( dictionary_2_store_derivatives, open(check_str, 'wb') )
+
 
     end_time = time.time()
 
@@ -787,9 +817,7 @@ def read_power():
 
 def z_eff_integrand(mu, datalist1):
     '''
-
     Function to compute the effective redshift of a redshift bin. 
-
     '''
     k_index, k, zminv, zmaxv = datalist1  # [numk, k, zmin_iter, zmax_iter]
     P_gg, P_uu = 0.0, 0.0
@@ -993,6 +1021,14 @@ def get_dCdx_matrix_elements(val_o, list_vals):
         m4 = dPdNeff_arr_uu[:, kindex, zindex]
         
 
+    elif val_o == 14: # varying n_s
+
+        m1 = dPdns_arr_gg[:, kindex, zindex]
+        m2 = dPdns_arr_gu[:, kindex, zindex]
+        m3 = m2        
+        m4 = dPdns_arr_uu[:, kindex, zindex]
+        
+
     else:
         raise Exception('get dCdx_matrix_elements(): o (input param for derivatives) can only be 0, 1, 2 ... 10, 11 or 12')
 
@@ -1131,7 +1167,7 @@ if __name__ == "__main__":
     # read in the power spectra, growth rate array, derivatives of power spectra w.r.t. different parameters of interest 
     read_power()
     # get the Planck 2018 results covariance matrix for the base LCDM parameters 
-    if include_Planck_base_LCDM_2018 and (0 in Data or 1 in Data or 2 in Data or 3 in Data or 4 in Data or 13 in Data):
+    if include_Planck_base_LCDM_2018 and (0 in Data or 1 in Data or 2 in Data or 3 in Data or 4 in Data or 13 in Data or 14 in Data):
         get_Planck18_MCMC(Data)
 
     ks = kvals
@@ -1146,7 +1182,6 @@ if __name__ == "__main__":
         # are NOT overlapping AND their is NO density field information,
         # then there is no density field information at all
 
-        # H0, As, Obh, Och, mnu, bg, rg, sigmau, sigmag
 
         for i in np.arange(nparams): 
 
@@ -1290,14 +1325,14 @@ if __name__ == "__main__":
         if (verbosity > 0):
             print("Fisher Matrix for this redshift bin:")
             print("==================")
-            if include_Planck_base_LCDM_2018 and (0 in Data or 1 in Data or 2 in Data or 3 in Data or 4 in Data or 13 in Data):
+            if include_Planck_base_LCDM_2018 and (0 in Data or 1 in Data or 2 in Data or 3 in Data or 4 in Data or 13 in Data or 14 in Data):
                 print('(Including Planck 2018 information: ' + data_from_MCMC_chains + ')')
                 print(np.matrix(Fisher_matrix) + planck_18_information) 
             else:
                 print(Fisher_matrix)
         
         # now invert the Fisher matrix
-        if include_Planck_base_LCDM_2018 and (0 in Data or 1 in Data or 2 in Data or 3 in Data or 4 in Data or 13 in Data):
+        if include_Planck_base_LCDM_2018 and (0 in Data or 1 in Data or 2 in Data or 3 in Data or 4 in Data or 13 in Data or 14 in Data):
             Fisher_matrix = np.matrix(Fisher_matrix) + planck_18_information
         else:
             Fisher_matrix = np.matrix(Fisher_matrix)
@@ -1332,8 +1367,8 @@ if __name__ == "__main__":
             print("============================================")
             for i in range(len(flags)): # print the error bars for each parameter, as determined from the inverted Fisher matrix inverse for this redshift bin
 
-                # H0, As, Obh, Och, mnu, bg, rg, sigmau, sigmag, N_eff
-                # 0 , 1,  2,   3,    4,  7,  8,    9,      10,     13
+                # H0, As, Obh, Och, mnu, bg, rg, sigmau, sigmag, N_eff, ns
+                # 0 , 1,  2,   3,    4,  7,  8,    9,      10,     13,  14
 
                 if (flags[i] == 0):
                     print("H0 = %.6f pm %.6f" % (H0, np.sqrt(inverted_Fisher_matrix[i,i])) )
@@ -1383,6 +1418,10 @@ if __name__ == "__main__":
                 elif (flags[i] == 13):
                     print("Neff = %.6f pm %.6f" % (3.046, np.sqrt(inverted_Fisher_matrix[i,i])) )
                     print(" %.4f percent error on Neff" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/(3.046))  )
+
+                elif (flags[i] == 14):
+                    print("ns = %.6f pm %.6f" % (ns, np.sqrt(inverted_Fisher_matrix[i,i])) )
+                    print(" %.4f percent error on ns" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/(ns))  )
 
             print("============================================")
 
@@ -1468,6 +1507,12 @@ if __name__ == "__main__":
                     string_data = string_data + '\n'
 
 
+                elif (flags[i] == 14):
+                    string_data = string_data + "ns = %.6f pm %.6f" % (ns, np.sqrt(inverted_Fisher_matrix[i,i])) 
+                    string_data = string_data + '\n'
+                    string_data = string_data +" %.4f percent error on ns" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/(ns))  
+                    string_data = string_data + '\n'
+
 
             uncertainties_dictionary[('zbin=%s-%s' % (zmin_iter, zmax_iter))] = string_data
             
@@ -1514,7 +1559,7 @@ if __name__ == "__main__":
         if (verbosity > 0):
             print("Fisher Matrix for all redshift bins:")
             print("======================")
-            if include_Planck_base_LCDM_2018 and (0 in Data or 1 in Data or 2 in Data or 3 in Data):
+            if include_Planck_base_LCDM_2018 and (0 in Data or 1 in Data or 2 in Data or 3 in Data or 4 in Data or 13 in Data or 14 in Data):
                 print('Including Planck 2018 results:')
                 print(Fisher_matrix_total + planck_18_information)
             else:
@@ -1525,7 +1570,7 @@ if __name__ == "__main__":
             fisher_matrices['sum of fisher information + any planck/extra info'] = Fisher_matrix_total + planck_18_information
 
         # Now invert the Fisher matrix
-        if include_Planck_base_LCDM_2018 and (0 in Data or 1 in Data or 2 in Data or 3 in Data):
+        if include_Planck_base_LCDM_2018 and (0 in Data or 1 in Data or 2 in Data or 3 in Data or 4 in Data or 13 in Data or 14 in Data):
             inverted_Fisher_matrix_total = np.linalg.inv(Fisher_matrix_total + planck_18_information)
         else:
             inverted_Fisher_matrix_total = np.linalg.inv(Fisher_matrix_total)
@@ -1600,6 +1645,9 @@ if __name__ == "__main__":
                     print(" %.4f percent error on Neff" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/(3.046))  )
 
 
+                elif (Data[i] == 14):
+                    print("n_s = %.6f pm %.6f" % (ns, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
+                    print(" %.4f percent error on n_s" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/(ns))  )
 
         if (verbosity > 0):
             print("Covariance Matrix:")
@@ -1682,6 +1730,13 @@ if __name__ == "__main__":
                     string_data = string_data + '\n'
 
 
+                elif (Data[i] == 14):
+                    string_data = string_data + "ns = %.6f pm %.6f" % (ns, np.sqrt(inverted_Fisher_matrix_total[i,i])) 
+                    string_data = string_data + '\n'
+                    string_data = string_data +" %.4f percent error on ns" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/(ns))  
+                    string_data = string_data + '\n'
+
+
             uncertainties_dictionary[('total fisher information covariance matrix')] = string_data
 
      
@@ -1694,12 +1749,14 @@ if __name__ == "__main__":
 
     if plot_ellipses and 4 in Data:
     
-        variable_names = [r'$H_0$',r'$A_s \times 10^{9}$',r'$\Omega_bh^2$',r'$\Omega_ch^2$',
-                            r'$M_{\nu}$',r'$b_g$',r'$r_g$',r'$\sigma_u$', r'$\sigma_g$', r'$N_{eff}$']
-
-
-        variable_names2 = ['H_0','A_sx1e9','Obh2', 'Och2', 'Mnu', 'bg', 'rg', 'sigmau', 'sigmag', 'Neff']              
-        vals = [H0, As*1e9, Obh, Och, m_nu, b_g_zeff, r_g, sigma_uh/h, sigma_gh/h, 3.046]
+        
+        vals = {'0': [H0, 'H_0', r'$H_0$'],                   '7': [b_g_zeff, 'bg', r'$b_g$'],
+                '1': [As*1e9, 'A_sx1e9', r'$A_s \times 10^{9}$'], '8': [r_g, 'rg', r'$r_g$'],
+                '2': [Obh, 'Obh2', r'$\Omega_bh^2$'],          '9': [sigma_uh/h, 'sigmau', r'$\sigma_u$'],
+                '3': [Och, 'Och2', r'$\Omega_ch^2$'],          '10': [sigma_gh/h, 'sigmag', r'$\sigma_g$'],
+                '4': [m_nu, 'Mnu', r'$M_{\nu}$'],             '13': [3.046, 'Neff', r'$N_{eff}$'],
+                '14': [ns, 'ns', r'$n_s$'],
+                     }
 
 
         for i in np.arange(len(Data)):
@@ -1707,7 +1764,7 @@ if __name__ == "__main__":
             if Data[i] != 4:
 
                 mnu_index = Data.index(4)
-                data_val = Data[i]
+                data_flag = Data[i]
                 
 
                 sigma_otherval_sqrd = 0
@@ -1740,9 +1797,9 @@ if __name__ == "__main__":
                 theta = np.arctan2(2.0*(cross_correlation), (sigma_mnu_sqrd - sigma_otherval_sqrd) )/2.0
 
 
-                ell1 = Ellipse(xy=(m_nu, vals[data_val]), width=width1, height=height1, angle=theta*180.0/np.pi)
-                ell2 = Ellipse(xy=(m_nu, vals[data_val]), width=width2, height=height2, angle=theta*180.0/np.pi)
-                ell3 = Ellipse(xy=(m_nu, vals[data_val]), width=width3, height=height3, angle=theta*180.0/np.pi)
+                ell1 = Ellipse(xy=(m_nu, vals[str(data_flag)][0]), width=width1, height=height1, angle=theta*180.0/np.pi)
+                ell2 = Ellipse(xy=(m_nu, vals[str(data_flag)][0]), width=width2, height=height2, angle=theta*180.0/np.pi)
+                ell3 = Ellipse(xy=(m_nu, vals[str(data_flag)][0]), width=width3, height=height3, angle=theta*180.0/np.pi)
 
                 ells = [ell1, ell2, ell3]
                 labels = [r'68.3%', r'95.4%', r'99.7%']
@@ -1755,11 +1812,11 @@ if __name__ == "__main__":
                 ell1.set(alpha=(0.2), facecolor = 'r')
                 ell2.set(alpha=(0.2), facecolor = 'r')
                 ell3.set(alpha=(0.2), facecolor = 'r')
-                ax.scatter(m_nu, vals[data_val], color='white')
+                ax.scatter(m_nu, vals[str(data_flag)][0], color='white')
                 plt.xlabel(r'$M_{\nu}$')
-                plt.ylabel(variable_names[data_val])
+                plt.ylabel( vals[str(data_flag)][2] )
                 plt.xlim([0, m_nu+width3/2.0 + 0.05])
-                plotname = save_file_folder+'mnu_%s_contour.png' % (variable_names2[data_val])
+                plotname = save_file_folder+'mnu_%s_contour.png' % (vals[str(data_flag)][1])
                 plt.savefig(plotname)
                 
 
@@ -1792,14 +1849,13 @@ if __name__ == "__main__":
 
         with open((save_file_folder + r'extra_details.txt'), 'w') as f:
             print('Value of effective redshift for all fisher information (matrices summed) in this forecasting run: ', z_eff, file=f)  
-            print('Value of kmin that sets value of f_0 such that f_0*fbar(k) = f(k): ', kmin_overall, file=f)  
+            
 
 
 
      # ----------------------------------------------------------------------------------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
 
