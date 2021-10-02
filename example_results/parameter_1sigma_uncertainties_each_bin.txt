@@ -1,96 +1,128 @@
 zbin=0.0-0.1
-H0 = 67.320000 pm 18.606990
- 27.6396 percent error on H0
-As = 2.100583 * 1e-9 pm 3.769554 * 1e-9
- 179.4527 percent error on As
-Obh = 0.022383 pm 0.006135
- 27.4075 percent error on Obh
-Och = 0.120110 pm 0.019404
- 16.1552 percent error on Och
-m_nu = 0.058000 pm 3.232253
- 5572.8493 percent error on m_nu
-b_g = 1.396632 pm 0.705583
- 50.5203 percent error on b_g
-sigma_g = 6.298277 pm 2.821308
- 44.7949 percent error on sigma_g
+H0 = 67.320000 pm 0.570135
+ 0.8469 percent error on H0
+As = 2.100583 * 1e-9 pm 0.030042 * 1e-9
+ 1.4302 percent error on As
+Obh = 0.022383 pm 0.000127
+ 0.5673 percent error on Obh
+Och = 0.120110 pm 0.000961
+ 0.8002 percent error on Och
+m_nu = 0.058000 pm 0.066070
+ 113.9143 percent error on m_nu
+Neff = 3.046000 pm 0.058353
+ 1.9157 percent error on Neff
+ns = 0.966050 pm 0.004584
+ 0.4745 percent error on ns
+b_g = 1.396632 pm 0.018973
+ 1.3584 percent error on b_g
+sigma_u = 19.310755 pm 0.559867
+ 2.8992 percent error on sigma_u
+sigma_g = 6.298277 pm 0.891649
+ 14.1570 percent error on sigma_g
 
 zbin=0.1-0.2
-H0 = 67.320000 pm 6.577855
- 9.7710 percent error on H0
-As = 2.100583 * 1e-9 pm 1.283715 * 1e-9
- 61.1123 percent error on As
-Obh = 0.022383 pm 0.002330
- 10.4110 percent error on Obh
-Och = 0.120110 pm 0.007463
- 6.2134 percent error on Och
-m_nu = 0.058000 pm 1.221769
- 2106.4979 percent error on m_nu
-b_g = 1.460242 pm 0.246953
- 16.9118 percent error on b_g
-sigma_g = 6.298277 pm 1.048850
- 16.6530 percent error on sigma_g
+H0 = 67.320000 pm 0.892448
+ 1.3257 percent error on H0
+As = 2.100583 * 1e-9 pm 0.032049 * 1e-9
+ 1.5257 percent error on As
+Obh = 0.022383 pm 0.000152
+ 0.6781 percent error on Obh
+Och = 0.120110 pm 0.002067
+ 1.7211 percent error on Och
+m_nu = 0.058000 pm 0.079972
+ 137.8830 percent error on m_nu
+Neff = 3.046000 pm 0.116061
+ 3.8103 percent error on Neff
+ns = 0.966050 pm 0.005633
+ 0.5831 percent error on ns
+b_g = 1.460242 pm 0.022985
+ 1.5740 percent error on b_g
+sigma_u = 19.310755 pm 1.122494
+ 5.8128 percent error on sigma_u
+sigma_g = 6.298277 pm 0.418995
+ 6.6525 percent error on sigma_g
 
 zbin=0.2-0.30000000000000004
-H0 = 67.320000 pm 4.430842
- 6.5818 percent error on H0
-As = 2.100583 * 1e-9 pm 0.818588 * 1e-9
- 38.9696 percent error on As
-Obh = 0.022383 pm 0.001421
- 6.3472 percent error on Obh
-Och = 0.120110 pm 0.004957
- 4.1271 percent error on Och
-m_nu = 0.058000 pm 0.801882
- 1382.5549 percent error on m_nu
-b_g = 1.535890 pm 0.165278
- 10.7611 percent error on b_g
-sigma_g = 6.298277 pm 0.690848
- 10.9688 percent error on sigma_g
+H0 = 67.320000 pm 1.100133
+ 1.6342 percent error on H0
+As = 2.100583 * 1e-9 pm 0.035243 * 1e-9
+ 1.6778 percent error on As
+Obh = 0.022383 pm 0.000160
+ 0.7152 percent error on Obh
+Och = 0.120110 pm 0.001961
+ 1.6325 percent error on Och
+m_nu = 0.058000 pm 0.094260
+ 162.5170 percent error on m_nu
+Neff = 3.046000 pm 0.106865
+ 3.5084 percent error on Neff
+ns = 0.966050 pm 0.005359
+ 0.5547 percent error on ns
+b_g = 1.535890 pm 0.027257
+ 1.7747 percent error on b_g
+sigma_u = 19.310755 pm 844.744385
+ 4374.4763 percent error on sigma_u
+sigma_g = 6.298277 pm 0.309094
+ 4.9076 percent error on sigma_g
 
 zbin=0.30000000000000004-0.4
-H0 = 67.320000 pm 4.086212
- 6.0698 percent error on H0
-As = 2.100583 * 1e-9 pm 0.679978 * 1e-9
- 32.3709 percent error on As
-Obh = 0.022383 pm 0.001121
- 5.0062 percent error on Obh
-Och = 0.120110 pm 0.004309
- 3.5874 percent error on Och
-m_nu = 0.058000 pm 0.651875
- 1123.9226 percent error on m_nu
-b_g = 1.620517 pm 0.149132
- 9.2028 percent error on b_g
-sigma_g = 6.298277 pm 0.606963
- 9.6370 percent error on sigma_g
+H0 = 67.320000 pm 0.992024
+ 1.4736 percent error on H0
+As = 2.100583 * 1e-9 pm 0.034641 * 1e-9
+ 1.6491 percent error on As
+Obh = 0.022383 pm 0.000150
+ 0.6686 percent error on Obh
+Och = 0.120110 pm 0.001797
+ 1.4962 percent error on Och
+m_nu = 0.058000 pm 0.094249
+ 162.4975 percent error on m_nu
+Neff = 3.046000 pm 0.091930
+ 3.0181 percent error on Neff
+ns = 0.966050 pm 0.004810
+ 0.4979 percent error on ns
+b_g = 1.620517 pm 0.027626
+ 1.7048 percent error on b_g
+sigma_g = 6.298277 pm 0.258075
+ 4.0975 percent error on sigma_g
 
 zbin=0.4-0.5
-H0 = 67.320000 pm 3.915831
- 5.8167 percent error on H0
-As = 2.100583 * 1e-9 pm 0.585239 * 1e-9
- 27.8608 percent error on As
-Obh = 0.022383 pm 0.001099
- 4.9082 percent error on Obh
-Och = 0.120110 pm 0.004357
- 3.6273 percent error on Och
-m_nu = 0.058000 pm 0.574161
- 989.9324 percent error on m_nu
-b_g = 1.698635 pm 0.134597
- 7.9238 percent error on b_g
-sigma_g = 6.298277 pm 0.571644
- 9.0762 percent error on sigma_g
+H0 = 67.320000 pm 0.935499
+ 1.3896 percent error on H0
+As = 2.100583 * 1e-9 pm 0.034324 * 1e-9
+ 1.6340 percent error on As
+Obh = 0.022383 pm 0.000144
+ 0.6435 percent error on Obh
+Och = 0.120110 pm 0.001758
+ 1.4638 percent error on Och
+m_nu = 0.058000 pm 0.094566
+ 163.0445 percent error on m_nu
+Neff = 3.046000 pm 0.085045
+ 2.7920 percent error on Neff
+ns = 0.966050 pm 0.004514
+ 0.4673 percent error on ns
+b_g = 1.698643 pm 0.027898
+ 1.6424 percent error on b_g
+sigma_g = 6.298277 pm 0.238013
+ 3.7790 percent error on sigma_g
 
 total fisher information covariance matrix
-H0 = 67.320000 pm 1.065350
- 1.5825 percent error on H0
-As = 2.100583 * 1e-9 pm 0.232384 * 1e-9
- 11.0628 percent error on As
-Obh = 0.022383 pm 0.000583
- 2.6025 percent error on Obh
-Och = 0.120110 pm 0.002184
- 1.8181 percent error on Och
-m_nu = 0.058000 pm 0.332210
- 572.7755 percent error on m_nu
-b_g = 1.617199 pm 0.031925
- 1.9741 percent error on b_g
-sigma_g = 6.298277 pm 0.212780
- 3.3784 percent error on sigma_g
+H0 = 67.320000 pm 0.405542
+ 0.6024 percent error on H0
+As = 2.100583 * 1e-9 pm 0.028100 * 1e-9
+ 1.3377 percent error on As
+Obh = 0.022383 pm 0.000114
+ 0.5108 percent error on Obh
+Och = 0.120110 pm 0.000780
+ 0.6494 percent error on Och
+m_nu = 0.058000 pm 0.054996
+ 94.8206 percent error on m_nu
+Neff = 3.046000 pm 0.041990
+ 1.3785 percent error on Neff
+ns = 0.966050 pm 0.003552
+ 0.3677 percent error on ns
+b_g = 1.617268 pm 0.014198
+ 0.8779 percent error on b_g
+sigma_u = 19.310755 pm 0.490964
+ 2.5424 percent error on sigma_u
+sigma_g = 6.298277 pm 0.139024
+ 2.2073 percent error on sigma_g
 
