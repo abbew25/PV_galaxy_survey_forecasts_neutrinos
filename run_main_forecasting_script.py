@@ -32,8 +32,8 @@ else:
 
 save_file_folder = str(os.getcwd()) + '/example_results/' # specify path for saving information if write_data_to_files = True 
 
-divide_by_h3_on_read_in = True                 # for number density files - is the number density of objects in 1/Mpc^3 * 1/h^3? (true for example files)
-multiply_by_h3_on_read_in = False              # for number density files - is the number density of objects in h^3/Mpc^3?
+divide_by_h3_on_read_in = False                # don't modify this, should probably never be set to TRUE
+multiply_by_h3_on_read_in = True               # for number density files - set to True if the number density of objects in h^3/Mpc^3
 multiply_by1eminus6_on_read_in = True          # for number density files - number densities in example files is multiplied by 1e6 to save precision
                                                # set to True to mutiply by 1e-6 on read in of files 
 
