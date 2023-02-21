@@ -2192,8 +2192,7 @@ if __name__ == "__main__":
 
     # ks = np.logspace(np.log10(1e-3), np.log10(1), 100, base=10)
     
-    # plt.loglog(ks, pk_neff2/pk_neff2 , label = 'lol u idiot - this one has neff = 6.08 something')
-    # plt.loglog(ks, pk_neff2/pk_neff1, label = 'lol u idiot - this one has neff = 3.046')
+
     # plt.legend()
     # plt.show()
     # good step sizes
