@@ -10,3 +10,6 @@ loguru 0.7.2
 rich 13.9.4
 pickle
 cython 3.0.11 
+ruff 0.11.8
+typing 3.7.4.3
+pre-commit 4.2.0
