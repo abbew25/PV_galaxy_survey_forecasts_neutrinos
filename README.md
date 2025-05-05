@@ -7,8 +7,8 @@ This code is heavily inspired by/based off the code here: https://github.com/Cul
 
 ## Technologies required
 
-This code was created with Python 3 (3.7.6). You will need to also install the CLASS package, see instructions at https://lesgourg.github.io/class_public/class.html.
-Other python packages required used include: scipy, numpy, pandas, os, time, pickle, matplotlib.
+This code has been updated to run on python 3.9.21. You will need to also install the CLASS package, see instructions at https://lesgourg.github.io/class_public/class.html.
+Other python packages required used include: scipy, cython, numpy, pandas, os, time, pickle, matplotlib, loguru, rich, pydantic, see more details in requirements.txt.
 
 ## How to use 
 
