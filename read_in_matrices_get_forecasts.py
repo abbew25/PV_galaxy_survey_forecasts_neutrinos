@@ -8,10 +8,15 @@
 import numpy as np
 import os 
 import pandas as pd 
+import numpy.typing as npt 
+from loguru import logger
+from rich.console import Console
+from enum import StrEnum
 
+console = Console()
 # functions ------------------------------------------------------------------------------
 
-def shrink_sqr_matrix(sqr_matrix_obj):
+def shrink_sqr_matrix(sqr_matrix_obj: npt.NDArray):
     ''' 
     Function that removed the rows and columns of a square matrix (numpy matrix) if the rows 
     and columns that a diagonal element of the matrix coincides with is zero.
@@ -39,7 +44,7 @@ def shrink_sqr_matrix(sqr_matrix_obj):
 
 
 # function to get the Planck 2018 MCMC chains for H0, As, Obh2, Och2
-def get_Planck18_MCMC(Data_list, MCMC_chains_option):
+def get_Planck18_MCMC(Data_list: list, MCMC_chains_option: int):
 
 
     Obh2_index = 0+2
@@ -142,7 +147,8 @@ def get_Planck18_MCMC(Data_list, MCMC_chains_option):
 
 
     else:
-        raise Exception('MCMC chains option is not valid. (in get_Planck18_MCMC()).')
+        logger.error('MCMC chains option is not valid. (in get_Planck18_MCMC()).')
+        # raise Exception('MCMC chains option is not valid. (in get_Planck18_MCMC()).')
     
     chain1 = pd.DataFrame(chain1)
     chain2 = pd.DataFrame(chain2)
@@ -326,15 +332,15 @@ cov = np.linalg.inv(total_fisher)
 
 # check if ill conditioned 
 if check_ill_conditioned:
-    print('If matrix is not ill-conditioned and is symmetric, the following number will be close to zero: -----')
-    print(sum(sum(total_fisher*cov))-sum(sum(total_fisher.T*cov))) # checking the matrix is symmetric and is not ill-conditioned  
-    
+    console.log('If matrix is not ill-conditioned and is symmetric, the following number will be close to zero: -----', style='bold blue')
+    console.log(sum(sum(total_fisher*cov))-sum(sum(total_fisher.T*cov)), style='bold blue') # checking the matrix is symmetric and is not ill-conditioned  
+
 
 # print error on mnu to terminal
 mnu_error = np.sqrt(cov[4,4])
 mnu_per_error = 100.0*mnu_error/0.058
 results_mnu = 'mnu error: ' + str(mnu_error) + ' eV, % error: ' + str(mnu_per_error)
-print(results_mnu)
+console.log(results_mnu, style='bold blue')
 
 
 # now write the results to an appropriate file location with a descriptive name

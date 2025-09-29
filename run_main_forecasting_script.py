@@ -7,7 +7,7 @@
 import os 
 import numpy as np
 import pickle
-
+from rich.console import Console
 
 #--------------------------------------------------------------------------------------------------------------------------------------
 
@@ -206,5 +206,6 @@ pickle.dump(forecasting_params, open('forecasting_params.p', 'wb'))
 from subprocess import call
 call(["python", "main_PV_forecasts.py"])
 
+console = Console(style='bold green')
 
-print('Finished running forecasts ')
+console.log('Finished running forecasts ')

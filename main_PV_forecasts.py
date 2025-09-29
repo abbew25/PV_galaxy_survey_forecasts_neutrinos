@@ -11,10 +11,15 @@ import pickle
 import os 
 from matplotlib.patches import Ellipse
 import functions_PV_forecasts as cosmo # functions for derivatives 
+import numpy.typing as npt 
+from loguru import logger
+from rich.console import Console
+from enum import StrEnum
 skiprows = 1  # number of rows skipped when reading in number density files in read_nz()
 
 #--------------------------------------------------------------------------------------------------------------------------------------
 # importing settings 
+console = Console(style="blue")
 
 include_Planck_base_LCDM_2018 = pickle.load( open('forecasting_params.p', 'rb') )['include_Planck_base_LCDM_2018']
 plot_ellipses = pickle.load( open('forecasting_params.p', 'rb') )['plot_ellipses']
@@ -125,7 +130,7 @@ uncertainties_dictionary = {}
 # ---------------------------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------------------------
 
-def shrink_sqr_matrix(sqr_matrix_obj, flags):
+def shrink_sqr_matrix(sqr_matrix_obj: npt.NDArray, flags: list):
     ''' 
     Function that removed the rows and columns of a square matrix (numpy matrix) if the rows 
     and columns that a diagonal element of the matrix coincides with is zero.
@@ -153,7 +158,7 @@ def shrink_sqr_matrix(sqr_matrix_obj, flags):
 
 
 # function to get the Planck 2018 MCMC chains for H0, As, Obh2, Och2
-def get_Planck18_MCMC(Data_list):
+def get_Planck18_MCMC(Data_list: list):
 
     global planck_18_information
 
@@ -254,7 +259,9 @@ def get_Planck18_MCMC(Data_list):
 
 
     else:
-        raise Exception('MCMC chains option is not valid. (in get_Planck18_MCMC()).')
+        message = f'MCMC chains option is not valid: {MCMC_chains_option}. (in get_Planck18_MCMC()).' 
+        logger.error(message)
+        # raise Exception('MCMC chains option is not valid. (in get_Planck18_MCMC()).')
     
     chain1 = pd.DataFrame(chain1)
     chain2 = pd.DataFrame(chain2)
@@ -367,7 +374,7 @@ def get_Planck18_MCMC(Data_list):
 
 
 # function used to integrate to compute proper distance from Friedmann Equation
-def E_z_inverse(z):
+def E_z_inverse(z: float):
     '''
     Compute the inverse of the E(z) function (from the first Friedmann Equation).
     '''
@@ -375,7 +382,7 @@ def E_z_inverse(z):
 
 
 
-def E_z(z):
+def E_z(z: float):
     '''
     Compute E(z) (from the first Friedmann Equation).
     '''
@@ -386,7 +393,7 @@ def E_z(z):
 
 
 # function that computes the proper distance as a function of redshift (dimensionless)
-def rz(red):
+def rz(red: npt.Union[float, npt.NDArray]):
     '''
     Calculates the proper radial distance to an object at redshift z for the given cosmological model.
     '''
@@ -422,7 +429,9 @@ def read_nz():
             number_density_data = pd.read_csv(r'%s' % (nbar_file[i]), header=None, engine='python', 
             delim_whitespace=True, names = ["n_red", "n_bar"], skiprows = skiprows)
         except: # raise an exception if it cannot be read in
-            raise Exception("File could not be read in: error in (read_nz()).")
+            message = f'File could not be read in: error in (read_nz()). File name: {nbar_file[i]}'
+            logger.error(message)
+            # raise Exception("File could not be read in: error in (read_nz()).")
 
         if i == 0: # save the redshifts array 
             Nredshiftsarror = np.array(number_density_data["n_red"])
@@ -445,7 +454,9 @@ def read_nz():
     
     # need to check the number of redshift bins match for velocity and position data 
     if (len(N_bar_arr[0]) != len(N_bar_arr[1])):
-        raise Exception("The length of the redshift bins for the velocity and position density files are not the same: error in (read_nz()).")
+        message = f'The length of the redshift bins for the velocity and position density files are not the same: error in (read_nz()).'
+        logger.error(message)
+        # raise Exception("The length of the redshift bins for the velocity and position density files are not the same: error in (read_nz()).")
 
 
     # create a redshift-distance spline to use globally 
@@ -487,7 +498,7 @@ def read_nz():
     
     end_time = time.time()
 
-    print('Run time for read_nz(): ', round(end_time - start_time,3), ' seconds.')
+    console.log('Run time for read_nz(): ', round(end_time - start_time,3), ' seconds.')
     ##################################################################################################################3
 
 
@@ -805,7 +816,7 @@ def read_power():
 
     end_time = time.time()
 
-    print('Run time for read_power(): ', round(end_time-start_time, 3), 
+    console.log('Run time for read_power(): ', round(end_time-start_time, 3), 
     ' seconds = ',round((end_time-start_time)/60.0, 3) , ' minutes.') 
 
     ####################################################################################################################
@@ -815,7 +826,7 @@ def read_power():
 # function to calculate the effective redshift
 
 
-def z_eff_integrand(mu, datalist1):
+def z_eff_integrand(mu: float, datalist1: list):
     '''
     Function to compute the effective redshift of a redshift bin. 
     '''
@@ -902,7 +913,7 @@ def z_eff_integrand(mu, datalist1):
 
 
 # get covariance matrix derivatives 
-def get_dCdx_matrix_elements(val_o, list_vals):
+def get_dCdx_matrix_elements(val_o: int, list_vals: list):
     '''
     Function to get the values for the derivatives of the covariance matrices.
     '''
@@ -1030,14 +1041,16 @@ def get_dCdx_matrix_elements(val_o, list_vals):
         
 
     else:
-        raise Exception('get dCdx_matrix_elements(): o (input param for derivatives) can only be 0, 1, 2 ... 10, 11 or 12')
+        message = 'get dCdx_matrix_elements(): val_o (input param for derivatives) = ' + str(val_o) 
+        logger.error(message)
+        # raise Exception('get dCdx_matrix_elements(): o (input param for derivatives) can only be 0, 1, 2 ... 10, 11 or 12')
 
 
     return m1, m2, m3, m4
 
 
 
-def mu_integrand(mu, datalist1): # function to be integrated over mu for Fisher matrix elements, 
+def mu_integrand(mu: float, datalist1: list): # function to be integrated over mu for Fisher matrix elements, 
     # at some k and mu values 
     '''
     Function to compute the integral of the Fisher matrix elements over mu for a single value of k and z.
@@ -1187,15 +1200,18 @@ if __name__ == "__main__":
 
             if Data[i] == 7: # bg
 
-                raise Exception("ERROR: b_g is a free parameter, but there is no information in the density field (Fisher matrix will be singular).")
+                message = "ERROR: b_g is a free parameter, but there is no information in the density field (Fisher matrix will be singular)."
+                logger.error(message)
 
             elif Data[i] == 8: # rg
 
-                raise Exception("ERROR: r_g is a free parameter, but there is no information in the density field (Fisher matrix will be singular).")
+                message = "ERROR: r_g is a free parameter, but there is no information in the density field (Fisher matrix will be singular)."
+                logger.error(message)
 
             elif Data[i] == 10: # sigmag
 
-                raise Exception("ERROR: sigma_g is a free parameter, but there is no information in the density field (Fisher matrix will be singular).")
+                message = "ERROR: sigma_g is a free parameter, but there is no information in the density field (Fisher matrix will be singular)."
+                logger.error(message)
 
 
 
@@ -1206,7 +1222,8 @@ if __name__ == "__main__":
         for i in np.arange(nparams): 
 
             if Data[i] == 9: # sigma_u
-                raise Exception("ERROR: sigma_u is a free parameter, but there is no information in the velocity field (Fisher matrix will be singular).")
+                message = "ERROR: sigma_u is a free parameter, but there is no information in the velocity field (Fisher matrix will be singular)."
+                logger.error(message)
      # --------------------------------------------------------------------------------------------------------
             
     # now start calculating the Fisher matrix
@@ -1219,7 +1236,7 @@ if __name__ == "__main__":
     inverted_Fisher_matrix_total = np.zeros((nparams, nparams))
     inverted_Fisher_matrix_total = np.matrix(inverted_Fisher_matrix_total) 
 
-    print("Evaluating the Fisher Matrix for %d redshift bins between [z_min = %.3f, z_max = %.3f]" % (num_redshift_bins, zmin, zmax))
+    console.log("Evaluating the Fisher Matrix for %d redshift bins between [z_min = %.3f, z_max = %.3f]" % (num_redshift_bins, zmin, zmax))
     
     # iterating through redshift bins 
     for ziter in range(num_redshift_bins): 
@@ -1239,7 +1256,7 @@ if __name__ == "__main__":
 
         # give information of min and max k modes
         if (verbosity > 0):
-            print("Evaluating the Fisher matrix with [k_min = %.6f, k_max = %.6f] and [z_min = %.3f, z_max = %.3f]" % (kmin, kmax, zmin_iter, zmax_iter))
+            console.log("Evaluating the Fisher matrix with [k_min = %.6f, k_max = %.6f] and [z_min = %.3f, z_max = %.3f]" % (kmin, kmax, zmin_iter, zmax_iter))
 
 
         # Calculate the effective redshift (which has been based on the sum of the S/N for the density and velocity fields)
@@ -1269,7 +1286,7 @@ if __name__ == "__main__":
 
         z_eff = k_sum1/k_sum2
         if (verbosity > 0): 
-            print("Effective redshift for this redshift bin, z_eff = %.6f" % z_eff)
+            console.log("Effective redshift for this redshift bin, z_eff = %.6f" % z_eff, style="bold yellow")
 
         
         
@@ -1323,13 +1340,13 @@ if __name__ == "__main__":
 
         # print the Fisher matrix to the terminal for this redshift bin 
         if (verbosity > 0):
-            print("Fisher Matrix for this redshift bin:")
-            print("==================")
+            console.log("Fisher Matrix for this redshift bin:", style='yellow')
+            console.log("==================")
             if include_Planck_base_LCDM_2018 and (0 in Data or 1 in Data or 2 in Data or 3 in Data or 4 in Data or 13 in Data or 14 in Data):
-                print('(Including Planck 2018 information: ' + data_from_MCMC_chains + ')')
-                print(np.matrix(Fisher_matrix) + planck_18_information) 
+                console.log('(Including Planck 2018 information: ' + data_from_MCMC_chains + ')', style='yellow')
+                console.log(np.matrix(Fisher_matrix) + planck_18_information, style='yellow') 
             else:
-                print(Fisher_matrix)
+                print(Fisher_matrix, style='yellow')
         
         # now invert the Fisher matrix
         if include_Planck_base_LCDM_2018 and (0 in Data or 1 in Data or 2 in Data or 3 in Data or 4 in Data or 13 in Data or 14 in Data):
@@ -1340,9 +1357,9 @@ if __name__ == "__main__":
         try: 
             inverted_Fisher_matrix = np.linalg.inv(Fisher_matrix)
         except:
-            print('Fisher matrix is singular, cannot be inverted in this redshift bin. ')
-            print('This may be because sigma_u is a free parameter but you have no velocity field information in this bin.')
-            print('Removing rows and columns corresponding to parameter we have no information for and reinverting matrix:')
+            console.log('Fisher matrix is singular, cannot be inverted in this redshift bin. ', style='bold red')
+            console.log('This may be because sigma_u is a free parameter but you have no velocity field information in this bin.', style='bold red')
+            console.log('Removing rows and columns corresponding to parameter we have no information for and reinverting matrix:', style='bold red')
 
             Fisher_matrix, flags = shrink_sqr_matrix(Fisher_matrix, Data)
             
@@ -1364,72 +1381,72 @@ if __name__ == "__main__":
         
         if verbosity > 0 and not (isinstance(inverted_Fisher_matrix, int)):
 
-            print("============================================")
+            console.log("============================================", style="bold yellow")
             for i in range(len(flags)): # print the error bars for each parameter, as determined from the inverted Fisher matrix inverse for this redshift bin
 
                 # H0, As, Obh, Och, mnu, bg, rg, sigmau, sigmag, N_eff, ns
                 # 0 , 1,  2,   3,    4,  7,  8,    9,      10,     13,  14
 
                 if (flags[i] == 0):
-                    print("H0 = %.6f pm %.6f" % (H0, np.sqrt(inverted_Fisher_matrix[i,i])) )
-                    print(" %.4f percent error on H0" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/H0)  )
+                    console.log("H0 = %.6f pm %.6f" % (H0, np.sqrt(inverted_Fisher_matrix[i,i])) )
+                    console.log(" %.4f percent error on H0" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/H0)  )
 
 
                 elif (flags[i] == 1):
-                    print("As = %.6f * 1e-9 pm %.6f * 1e-9" % (As*1e9, np.sqrt(inverted_Fisher_matrix[i,i])*1e9) )
-                    print(" %.4f percent error on As" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/As)  )
+                    console.log("As = %.6f * 1e-9 pm %.6f * 1e-9" % (As*1e9, np.sqrt(inverted_Fisher_matrix[i,i])*1e9) )
+                    console.log(" %.4f percent error on As" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/As)  )
 
 
                 elif (flags[i] == 2):
-                    print("Obh = %.6f pm %.6f" % (Obh, np.sqrt(inverted_Fisher_matrix[i,i])) )
-                    print(" %.4f percent error on Obh" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/Obh)  )
+                    console.log("Obh = %.6f pm %.6f" % (Obh, np.sqrt(inverted_Fisher_matrix[i,i])) )
+                    console.log(" %.4f percent error on Obh" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/Obh)  )
 
                     
                 elif (flags[i] == 3):
-                    print("Och = %.6f pm %.6f" % (Och, np.sqrt(inverted_Fisher_matrix[i,i])) )
-                    print(" %.4f percent error on Och" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/Och)  )
+                    console.log("Och = %.6f pm %.6f" % (Och, np.sqrt(inverted_Fisher_matrix[i,i])) )
+                    console.log(" %.4f percent error on Och" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/Och)  )
 
                     
                 elif (flags[i] == 4):
-                    print("m_nu = %.6f pm %.6f" % (m_nu, np.sqrt(inverted_Fisher_matrix[i,i])) )
-                    print(" %.4f percent error on m_nu" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/m_nu)  )
+                    console.log("m_nu = %.6f pm %.6f" % (m_nu, np.sqrt(inverted_Fisher_matrix[i,i])) )
+                    console.log(" %.4f percent error on m_nu" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/m_nu)  )
 
 
                 elif (flags[i] == 7):
-                    print("b_g = %.6f pm %.6f" % (b_g_zeff, np.sqrt(inverted_Fisher_matrix[i,i])) )
-                    print(" %.4f percent error on b_g" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/b_g_zeff)  )
+                    console.log("b_g = %.6f pm %.6f" % (b_g_zeff, np.sqrt(inverted_Fisher_matrix[i,i])) )
+                    console.log(" %.4f percent error on b_g" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/b_g_zeff)  )
 
                 
                 elif (flags[i] == 8):
-                    print("r_g = %.6f pm %.6f" % (r_g, np.sqrt(inverted_Fisher_matrix[i,i])) )
-                    print(" %.4f percent error on r_g" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/r_g)  )
+                    console.log("r_g = %.6f pm %.6f" % (r_g, np.sqrt(inverted_Fisher_matrix[i,i])) )
+                    console.log(" %.4f percent error on r_g" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/r_g)  )
 
 
                 elif (flags[i] == 9):
-                    print("sigma_u = %.6f pm %.6f" % (sigma_uh/h, np.sqrt(inverted_Fisher_matrix[i,i])) )
-                    print(" %.4f percent error on sigma_u" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/(sigma_uh/h))    ) 
+                    console.log("sigma_u = %.6f pm %.6f" % (sigma_uh/h, np.sqrt(inverted_Fisher_matrix[i,i])) )
+                    console.log(" %.4f percent error on sigma_u" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/(sigma_uh/h))    ) 
 
                 
                 elif (flags[i] == 10):
-                    print("sigma_g = %.6f pm %.6f" % (sigma_gh/h, np.sqrt(inverted_Fisher_matrix[i,i])) )
-                    print(" %.4f percent error on sigma_g" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/(sigma_gh/h))  )
+                    console.log("sigma_g = %.6f pm %.6f" % (sigma_gh/h, np.sqrt(inverted_Fisher_matrix[i,i])) )
+                    console.log(" %.4f percent error on sigma_g" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/(sigma_gh/h))  )
 
 
                 elif (flags[i] == 13):
-                    print("Neff = %.6f pm %.6f" % (3.046, np.sqrt(inverted_Fisher_matrix[i,i])) )
-                    print(" %.4f percent error on Neff" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/(3.046))  )
+                    console.log("Neff = %.6f pm %.6f" % (3.046, np.sqrt(inverted_Fisher_matrix[i,i])) )
+                    console.log(" %.4f percent error on Neff" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/(3.046))  )
 
                 elif (flags[i] == 14):
-                    print("ns = %.6f pm %.6f" % (ns, np.sqrt(inverted_Fisher_matrix[i,i])) )
-                    print(" %.4f percent error on ns" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/(ns))  )
+                    console.log("ns = %.6f pm %.6f" % (ns, np.sqrt(inverted_Fisher_matrix[i,i])) )
+                    console.log(" %.4f percent error on ns" % (100*np.sqrt(inverted_Fisher_matrix[i, i])/(ns))  )
 
-            print("============================================")
+            console.log("============================================", style="bold yellow")
 
         # print the inverted Fisher matrix to the terminal for this redshift bin 
         if verbosity > 0 and not (isinstance(inverted_Fisher_matrix, int)):
-            print("Covariance Matrix for this redshift bin:")
-            print("==================")
-            print(inverted_Fisher_matrix)
+            console.log("Covariance Matrix for this redshift bin:", style='yellow')
+            console.log("==================", style='yellow')
+            console.log(inverted_Fisher_matrix, style='yellow')
 
         string_data = ''
 
@@ -1525,7 +1542,7 @@ if __name__ == "__main__":
         kmin = np.pi/rzmax
 
         if (verbosity > 0):
-            print("Finally, evaluating the Fisher Matrix for all redshift bins: ", \
+            console.log("Finally, evaluating the Fisher Matrix for all redshift bins: ", \
             " [k_min = %.5f, k_max = %.5f] and [z_min = %.3f, z_max = %.3f]" % (kmin, kmax, zmin, zmax))
 
          # Calculate the effective redshift (which I base on the sum of the S/N for the density and velocity fields)
@@ -1553,17 +1570,17 @@ if __name__ == "__main__":
         
         z_eff = k_sum1/k_sum2
         if (verbosity > 0): 
-            print("Effective redshift z_eff = %.6f" % z_eff)
+            console.log("Effective redshift z_eff = %.6f" % z_eff, style="bold yellow")
 
 
         if (verbosity > 0):
-            print("Fisher Matrix for all redshift bins:")
-            print("======================")
+            console.log("Fisher Matrix for all redshift bins:", style='yellow')
+            console.log("======================", style='yellow')
             if include_Planck_base_LCDM_2018 and (0 in Data or 1 in Data or 2 in Data or 3 in Data or 4 in Data or 13 in Data or 14 in Data):
-                print('Including Planck 2018 results:')
-                print(Fisher_matrix_total + planck_18_information)
+                console.log('Including Planck 2018 results:', style='yellow')
+                console.log(Fisher_matrix_total + planck_18_information, style='yellow')
             else:
-                print(Fisher_matrix_total)
+                console.log(Fisher_matrix_total, style='yellow')
 
         if write_data_to_files and include_Planck_base_LCDM_2018:
 
@@ -1596,63 +1613,62 @@ if __name__ == "__main__":
                 # 0 , 1,  2,   3,    4,  7,  8,    9,      10,     13
 
                 if (Data[i] == 0):
-                    print("H0 = %.6f pm %.6f" % (H0, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
-                    print(" %.4f percent error on H0" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/H0)  )
+                    console.log("H0 = %.6f pm %.6f" % (H0, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
+                    console.log(" %.4f percent error on H0" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/H0)  )
 
 
                 elif (Data[i] == 1):
-                    print("As = %.6f * 1e-9 pm %.6f *1e-9" % (As*1e9, np.sqrt(inverted_Fisher_matrix_total[i,i])*1e9) )
-                    print(" %.4f percent error on As" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/As)  )
+                    console.log("As = %.6f * 1e-9 pm %.6f *1e-9" % (As*1e9, np.sqrt(inverted_Fisher_matrix_total[i,i])*1e9) )
+                    console.log(" %.4f percent error on As" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/As)  )
 
 
                 elif (Data[i] == 2):
-                    print("Obh = %.6f pm %.6f" % (Obh, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
-                    print(" %.4f percent error on Obh" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/Obh)  )
+                    console.log("Obh = %.6f pm %.6f" % (Obh, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
+                    console.log(" %.4f percent error on Obh" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/Obh)  )
 
 
                 elif (Data[i] == 3):
-                    print("Och = %.6f pm %.6f" % (Och, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
-                    print(" %.4f percent error on Och" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/Och)  )
+                    console.log("Och = %.6f pm %.6f" % (Och, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
+                    console.log(" %.4f percent error on Och" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/Och)  )
 
 
                 elif (Data[i] == 4):
-                    print("m_nu = %.6f pm %.6f" % (m_nu, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
-                    print(" %.4f percent error on m_nu" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/m_nu)  )
+                    console.log("m_nu = %.6f pm %.6f" % (m_nu, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
+                    console.log(" %.4f percent error on m_nu" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/m_nu)  )
 
 
                 elif (Data[i] == 7):
-                    print("b_g = %.6f pm %.6f" % (b_g_zeff, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
-                    print(" %.4f percent error on b_g" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/b_g_zeff)  )
+                    console.log("b_g = %.6f pm %.6f" % (b_g_zeff, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
+                    console.log(" %.4f percent error on b_g" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/b_g_zeff)  )
 
                 
                 elif (Data[i] == 8):
-                    print("r_g = %.6f pm %.6f" % (r_g, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
-                    print(" %.4f percent error on r_g" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/r_g)  )
+                    console.log("r_g = %.6f pm %.6f" % (r_g, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
+                    console.log(" %.4f percent error on r_g" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/r_g)  )
 
 
                 elif (Data[i] == 9):
-                    print("sigma_u = %.6f pm %.6f" % (sigma_uh/h, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
-                    print(" %.4f percent error on sigma_u" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/(sigma_uh/h))    ) 
+                    console.log("sigma_u = %.6f pm %.6f" % (sigma_uh/h, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
+                    console.log(" %.4f percent error on sigma_u" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/(sigma_uh/h))    )
 
-                
                 elif (Data[i] == 10):
-                    print("sigma_g = %.6f pm %.6f" % (sigma_gh/h, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
-                    print(" %.4f percent error on sigma_g" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/(sigma_gh/h))  )
+                    console.log("sigma_g = %.6f pm %.6f" % (sigma_gh/h, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
+                    console.log(" %.4f percent error on sigma_g" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/(sigma_gh/h))  )
 
                 
                 elif (Data[i] == 13):
-                    print("Neff = %.6f pm %.6f" % (3.046, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
-                    print(" %.4f percent error on Neff" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/(3.046))  )
+                    console.log("Neff = %.6f pm %.6f" % (3.046, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
+                    console.log(" %.4f percent error on Neff" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/(3.046))  )
 
 
                 elif (Data[i] == 14):
-                    print("n_s = %.6f pm %.6f" % (ns, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
-                    print(" %.4f percent error on n_s" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/(ns))  )
+                    console.log("n_s = %.6f pm %.6f" % (ns, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
+                    console.log(" %.4f percent error on n_s" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/(ns))  )
 
         if (verbosity > 0):
-            print("Covariance Matrix:")
-            print("======================")
-            print(inverted_Fisher_matrix_total)
+            console.log("Covariance Matrix:", style='yellow')
+            console.log("======================", style='yellow')
+            console.log(inverted_Fisher_matrix_total, style='yellow')
 
 
         if write_data_to_files:
