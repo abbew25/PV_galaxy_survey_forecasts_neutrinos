@@ -15,6 +15,10 @@ import matplotlib.ticker as mtick
 import numpy.typing as npt 
 from loguru import logger
 from rich.console import Console
+from enum import StrEnum
+
+# setting up some new object things 
+variable = StrEnum("variable", "H0 Oc")
 
 # function definitions ----------------------------------------------------------------------------
 
@@ -192,7 +196,7 @@ def get_mus_realobs(mus: float, As_t: float,  # get the actual observations of m
     Mnu_t: float, As_fid: float, Obh2_fid: float, 
     Och2_fid: float, H0_fid: float, Mnu_fid: float, z: float):
     '''
-    Returns mu (actual/real) computed from parameters for real and fidicual cosmologies and values for mu fiducial.  
+    Returns mu (observed) computed from parameters for real and fidicual cosmologies and mu (actual). 
     '''
     F = distortion_ratio_F(As_t, Obh2_t, Och2_t, H0_t, Mnu_t, As_fid, Obh2_fid, Och2_fid, H0_fid, Mnu_fid, z)
     mus_obs = ((mus)/(F))*(1.0/(np.sqrt(1.0 + (mus**2)*( 1.0/(F**2) - 1.0 ))))
@@ -200,13 +204,25 @@ def get_mus_realobs(mus: float, As_t: float,  # get the actual observations of m
     return mus_obs
 
 
+# function to get mu_observed (observed values of mu) from mu_actual 
+def get_mus_obsreal(mus_obs: float, As_t: float,  # get the actual mu given some some set of mus to be the observations
+    Obh2_t: float, Och2_t: float, H0_t: float, 
+    Mnu_t: float, As_fid: float, Obh2_fid: float, 
+    Och2_fid: float, H0_fid: float, Mnu_fid: float, z: float):
+    '''
+    Returns mu (real) computed from parameters for real and fidicual cosmologies and mu (observed). 
+    '''
+    F = distortion_ratio_F(As_t, Obh2_t, Och2_t, H0_t, Mnu_t, As_fid, Obh2_fid, Och2_fid, H0_fid, Mnu_fid, z)
+    mu_real = mus_obs * F * (np.sqrt(1.0 + (mus_obs**2)*(F**2 - 1.0))) 
+    return mu_real 
+
 # function to get k_real (real k modes) from k_fiducial (values of mk modes observer believes they are measuring based on fiducial cosmology)
 def get_ks_realobs(ks: float, As_t: float, Obh2_t: float, 
     Och2_t: float, H0_t: float, Mnu_t: float, 
     As_fid: float, Obh2_fid: float, Och2_fid: float, 
     H0_fid: float, Mnu_fid: float, z: float, mus: float):
     '''
-    Returns k (actual/real) computed from parameters for real and fidicial cosmo and mu and k fiducial.
+    Returns k (observed) computed from parameters for real and fidicial cosmo and mu and k (actual).
     '''
     F = distortion_ratio_F(As_t, Obh2_t, Och2_t, H0_t, Mnu_t, As_fid, Obh2_fid, Och2_fid, H0_fid, Mnu_fid, z)
     q_perp = distortion_perpendicular(As_t, Obh2_t, Och2_t, H0_t, Mnu_t, As_fid, Obh2_fid, Och2_fid, H0_fid, Mnu_fid, z)
@@ -216,8 +232,18 @@ def get_ks_realobs(ks: float, As_t: float, Obh2_t: float,
     return ks_obs
 
 
-
-
+# function to get k_observed (observed k modes) from k_actual 
+def get_ks_obsreal(ks_obs: float, As_t: float, Obh2_t: float,
+    Och2_t: float, H0_t: float, Mnu_t: float, 
+    As_fid: float, Obh2_fid: float, Och2_fid: float, 
+    H0_fid: float, Mnu_fid: float, z: float, mus: float):
+    '''
+    Returns k (real) computed from parameters for real and fiducial cosmologies and k (observed).
+    '''
+    F = distortion_ratio_F(As_t, Obh2_t, Och2_t, H0_t, Mnu_t, As_fid, Obh2_fid, Och2_fid, H0_fid, Mnu_fid, z)
+    q_perp = distortion_perpendicular(As_t, Obh2_t, Och2_t, H0_t, Mnu_t, As_fid, Obh2_fid, Och2_fid, H0_fid, Mnu_fid, z)
+    ks_real = ks_obs * q_perp / (np.sqrt(1.0 + (mus**2)*(F**2 - 1.0)))
+    return ks_real
 
 
 # function to just get the power spectrum of matter (linear) from CLASS----------------------------
@@ -269,7 +295,7 @@ linornonlin: str, N_eff_deviation: float):
 
     M.compute() 
     
-    # now to compute the power spectrum at the true (k, mu) given (k_fid, mu_fid) -------------------------------------------
+    # now to compute the power spectrum at the observed (k, mu) given (k, mu actual) -------------------------------------------
 
     # first make an array with all the fiducial values of k
     ks_true = []
@@ -515,7 +541,6 @@ H0_t: float, omegam_t: float, omegalambda_t: float, q_para: float, q_perp: float
 # ---------------------------------------------------------------------------------------------------------
 
 
-
 # function to compute the derivative of real k (k = k(k_fid, z, cosmological parameters...)) with respect to cosmological parameters 
 def dk_obs_dx(param: int, dF_dx: float, dq_perp_dx: float, mu: float, k: float, F: float, q_perp: float):
     '''
@@ -530,17 +555,10 @@ def dk_obs_dx(param: int, dF_dx: float, dq_perp_dx: float, mu: float, k: float, 
         return res
 
     else: # Any other derivatives are always zero 
-        msg = 'param value (o) is probably not correct (dk_obs_dx())'
+        msg = 'param value (o) is probably not correct - needs to be H0 (dk_obs_dx())'
         logger.error(msg)   
         raise (ValueError)
 
-
-# function to integrate numerically for computing derivatives 
-def func_2_integrate_2(z: float, Om: float, H0: float):
-    '''
-    Function to integrate to compute derivatives of k and mu real w.r.t. cosmo parameters. 
-    '''
-    return H0*((1.0+z)**3 - 1.0)/(get_Hubble_z(z, Om, H0)**3) 
 
 
 # function to compute the derivative of the distortion ratio F with respect to cosmological parameters
@@ -553,23 +571,24 @@ def dF_distortion_dx(param: int, F: float, H0_t: float, z: float, Om_t: float):
     E_z = H_z_t/H0_t
     h_t = H0_t/100.0
     D_a_z = angular_diameter_distance(Om_t, H0_t, z)
+    c = 299792.458 # speed of light in km/s 
+    
     if param == 1: # H0
+       
         res = 0.0
-        return res
 
     elif param == 2 or param == 3 or param == 4: # Mnu, Obh, Och
-         
-        integral = quad(func_2_integrate_2, 0.0, z, args = (Om_t, H0_t))[0]
-    
-        dOmega_m_dx = 1.0*(1.0 + z)**3 -1.0 
-        if param == 2:
-            dOmega_m_dx = (1.0*(1.0 + z)**3 -1.0) * (1.0/(93.14*h_t**2))
-            integral = integral/(93.14*h_t**2)
         
-        res = -1.0 * F / (H_z_t * D_a_z) * ((0.5/H_z_t * (dOmega_m_dx) * D_a_z  ) + (H_z_t * (-1.0*integral)) )
-        
+        functoint = lambda zi: H0_t * ((1.0 + zi)**3 - 1.0) * (1.0 / h_t**2) * -0.5 / E_z**3 
+        dinvEz_dx = ( 1.0*(1.0 + z)**3 -1.0 ) * (1.0 / h_t**2) * -0.5 / E_z**3 
         if param == 2:
-            res /= 93.14
+            dinvEz_dx = ( 1.0*(1.0 + z)**3 -1.0 ) * (1.0 / (93.14 * h_t**2)) * -0.5 / E_z**3 
+            functoint = lambda zi: H0_t * ((1.0 + zi)**3 - 1.0) * (1.0 / (93.14 * h_t**2)) * -0.5 / E_z**3 
+        
+        integral = quad(functoint, 0.0, z)[0] 
+        integral = integral * (c / H0_t) * 1.0/(1.0 + z) 
+        res = F / D_a_z * integral - F * E_z * dinvEz_dx 
+        
         return res
 
     else:
@@ -607,6 +626,7 @@ Om_fid: float, z: float, c: float = 299792.458):
     D_a_fid = angular_diameter_distance(Om_fid, H0_fid, z)
     h_t = H0_t/100.0
     q_perp = D_a_real/D_a_fid
+    E_z = get_Hubble_z(z, Om_t, H0_t)/H0_t 
     
     if param == 1: # H0
 
@@ -614,12 +634,15 @@ Om_fid: float, z: float, c: float = 299792.458):
         return res 
        
     elif param == 2 or param == 3 or param == 4: # H0, Mnu, Obh, Och
-
-        integral = -1.0 * quad(func_2_integrate_2, 0.0, z, args = (Om_t, H0_t))[0]
-        if param == 2:
-            integral = integral/(93.14*h_t**2)
         
-        res = 1.0/(D_a_fid) * (1.0/H0_t) * integral
+        functoint = lambda zi: H0_t * ((1.0 + zi)**3 - 1.0) * (1.0 / h_t**2) * -0.5 / E_z**3 
+        if param == 2:
+            functoint = lambda zi: H0_t * ((1.0 + zi)**3 - 1.0) * (1.0 / (93.14 * h_t**2)) * -0.5 / E_z**3 
+        
+        integral = quad(functoint, 0.0, z)[0] 
+        integral = integral * (c / H0_t) * 1.0/(1.0 + z) 
+        
+        res = 1.0/(D_a_fid) * integral
         return res 
             
     else:
@@ -639,6 +662,7 @@ def dq_para_distortion_dx(param: int, H0_t: float, H0_fid: float, Om_t: float, O
     H_z_f = get_Hubble_z(z, Om_fid, H0_fid)
     h = H0_t/100.0
     q_para = H_z_f/H_z_t
+    E_z = H_z_t/H0_t
 
     if param == 1: #H0
 
@@ -647,13 +671,12 @@ def dq_para_distortion_dx(param: int, H0_t: float, H0_fid: float, Om_t: float, O
 
     elif param == 2 or param == 3 or param == 4: # Mnu, Obh or Och
 
-        dOmega_m_dx = 1.0*(1.0 + z)**3 - 1.0
+        dE2_dx = (1.0*(1.0 + z)**3 - 1.0) * (1.0/(h**2))
         if param == 2:
-            dOmega_m_dx = (1.0*(1.0 + z)**3 - 1.0) * (1.0/(93.14*h**2))
+            dE2_dx = (1.0*(1.0 + z)**3 - 1.0) * (1.0/(93.14*h**2))
             
-        res = -1.0 * q_para / (H_z_t) * H0_t * dOmega_m_dx
-        return res 
-    
+        res = -0.5 * q_para * dE2_dx / (E_z**2) 
+        return res
 
     else:
         msg = 'param value (o) is probably not correct (dq_para_distortion_dx()).'
@@ -1176,8 +1199,7 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
             ns_val = param_variation[i]
 
         # get omega_m
-        omegam = (Obh + Och + (mnu/93.14))/(h**2)
-
+        omegam = get_Om_0(Obh, Och, mnu, H0)
         
         
         Pk_cb, ks, mus = run_class(Obh, Och, H0, As, mnu, neutrino_hier, [z], kmin, kmax, num_k_points,
@@ -1280,7 +1302,7 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
     Och = Och_central
     mnu = mnu_central
     As = As_central
-    omegam = ( Obh_central + Och_central + (mnu_central/93.14) )/(hsqrd)
+    omegam = get_Om_0(Obh, Och, mnu, H0)
     N_eff_deviation = 0
     delta_mnu_max = 0.0
     ns_val = ns 
@@ -2084,10 +2106,10 @@ tau: float, ns: float, N_eff_deviation: float):
         elif o == 11: # ns 
             ns_val = param_variation[i]
         # get omega_m
-        omegam = (Obh + Och + (mnu/93.14))/(h**2)
+        omegam = get_Om_0(Obh, Och, mnu, H0)
 
 
-        Pk_cb, ks_r, mus_r = run_class(Obh, Och, H0, As, mnu, neutrino_hier, zed_list, kmin, 
+        Pk_cb, ks_obs, mus_obs = run_class(Obh, Och, H0, As, mnu, neutrino_hier, zed_list, kmin, 
         kmax, num_k_points, dm2_atm, dm2_sol, delta_mnu_max, mnu_central, kspaceoption, tau, ns_val, 
         Obh_central, Och_central, H0_central, As_central, mnu_central, mu_s, lin_or_nonlin, N_eff_deviation)
             
@@ -2097,15 +2119,15 @@ tau: float, ns: float, N_eff_deviation: float):
         kspaceoption, tau, ns_val, N_eff_deviation, delta_mnu_max=delta_mnu_max)[0]
             
 
-        if Pk_cb.shape == (len(mu_s), num_k_points, len(zed_list)) and ks_r.shape == (len(mu_s), num_k_points, len(zed_list)) and mus_r.shape == (len(mu_s), len(zed_list)) and f.shape == (len(mu_s), num_k_points, len(zed_list)):
+        if Pk_cb.shape == (len(mu_s), num_k_points, len(zed_list)) and ks_obs.shape == (len(mu_s), num_k_points, len(zed_list)) and mus_obs.shape == (len(mu_s), len(zed_list)) and f.shape == (len(mu_s), num_k_points, len(zed_list)):
 
             matter_power_spectra_arr[i,:,:,:] = Pk_cb
-            ks_obs_arr[i,:,:,:] = ks_r
-            mus_obs_arr[i,:,:] = mus_r
+            ks_obs_arr[i,:,:,:] = ks_obs
+            mus_obs_arr[i,:,:] = mus_obs
             growth_rate_arr[i,:,:,:] = f
 
 
-        elif Pk_cb.shape == (num_k_points, len(zed_list)) and ks_r.shape == (num_k_points,) and mus_r.shape == (len(mu_s_fid),) and f.shape == (len(mu_s_fid), num_k_points, len(zed_list)):
+        elif Pk_cb.shape == (num_k_points, len(zed_list)) and ks_obs.shape == (num_k_points,) and mus_obs.shape == (len(mu_s),) and f.shape == (len(mu_s), num_k_points, len(zed_list)):
 
             for muu in np.arange(len(mu_s)):
                 matter_power_spectra_arr[i,muu,:,:] = Pk_cb
@@ -2120,8 +2142,8 @@ tau: float, ns: float, N_eff_deviation: float):
 
         else:
             print('shape Pk_cb: ', Pk_cb.shape)
-            print('shape ks: ', ks_r.shape)
-            print('shape mus:', mus_r.shape)
+            print('shape ks: ', ks_obs.shape)
+            print('shape mus:', mus_obs.shape)
             print('shape f: ', f.shape)
             msg = 'Shape of Pk_cb / k / mu /growth rate array returned from run_class() is unexpected and cannot be adapted ' + 'to store in matter_power_spectrum_arr / ks_obs_arr / mus_obs_arr / growth_rates_arr (derivative_power_spectra()).'
             logger.error(msg)
@@ -2133,7 +2155,7 @@ tau: float, ns: float, N_eff_deviation: float):
             q_para = distortion_parallel(As, Obh, Och, H0, mnu, As_central, Obh_central, Och_central, H0_central, mnu_central, zed_list[zz])
             q_perp = distortion_perpendicular(As, Obh, Och, H0, mnu, As_central, Obh_central, Och_central, H0_central, mnu_central, zed_list[zz])
 
-            for muu in np.arange(len(mu_s)): # looping through muuuuuu
+            for muu in np.arange(len(mu_s)): # looping through mu
                     
                 redshift_space_power_spectra_gg[i, muu, :, zz] = gg_redshift_s(b_g[zz], r_g, growth_rate_arr[i, muu, :, zz],
                 sigmag, mus_obs_arr[i, muu, zz], ks_obs_arr[i, muu, :, zz], zed_list[zz], H0, q_para, 
