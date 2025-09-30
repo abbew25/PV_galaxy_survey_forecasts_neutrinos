@@ -331,7 +331,7 @@ linornonlin: str, N_eff_deviation: float):
                 As_fid, omega_b_fid, omega_cdm_fid, H0_fid, m_nu_fid, zed[zz], mus_arr[muu])
 
             mus_obs[:, zz] = get_mus_realobs(mus_arr, As_t, omega_b_t, omega_cdm_t, H0_t, m_nu_t, 
-            As_fid, omega_b_fid, omega_cdm_fid, H0_fid, m_nu_fid, zed[zz])
+            As_fid, omega_b_fid, omega_cdm_fid, H0_fid, m_nu_fid, zed[zz]).flatten()
 
         # get the matter power spectra at k'
         Pk = np.zeros((len(mus_arr), knum, len(zed)))
@@ -363,7 +363,7 @@ mus_arr: npt.NDArray, N_eff_deviation: float):
 
     pk, ks, mus = run_class(omega_b_t, omega_cdm_t, H0_t, As_t, m_nu_t, neutrino_hierarchy, zs, kmin, kmax, 
     knum, del_mnu_max, sum_masses_central_t, kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid,
-    H0_fid, As_fid, m_nu_fid, mus_arr, 'linear', N_eff_deviation)[0]
+    H0_fid, As_fid, m_nu_fid, mus_arr, 'linear', N_eff_deviation)
 
     growthrate = 0
     da = abs(scalefactors[1] - scalefactors[0])
@@ -416,11 +416,11 @@ m_nu_fid: float, mus_arr: npt.NDArray, N_eff_deviation: float):
 
     if param == cosmo_variable.H0: 
         lowf = growth_rate(omega_b_t, omega_cdm_t, H0_t-delta, As_t, m_nu_t, neutrino_hierarchy, zed, 
-        kmin, kmax, knum, d_a, linear, del_mnu_max, sum_masses_central_t, 
+        kmin, kmax, knum, d_a, del_mnu_max, sum_masses_central_t, 
         kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_arr, N_eff_deviation)[0]
 
         highf = growth_rate(omega_b_t, omega_cdm_t, H0_t+delta, As_t, m_nu_t, neutrino_hierarchy, 
-        zed, kmin, kmax, knum, d_a, linear, del_mnu_max, sum_masses_central_t, 
+        zed, kmin, kmax, knum, d_a, del_mnu_max, sum_masses_central_t, 
         kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_arr, N_eff_deviation)[0]
 
         df_dH = (highf - lowf)/(2*delta)
@@ -428,35 +428,35 @@ m_nu_fid: float, mus_arr: npt.NDArray, N_eff_deviation: float):
 
     elif param == cosmo_variable.mnu:
         lowf = growth_rate(omega_b_t, omega_cdm_t, H0_t, As_t, m_nu_t-delta, neutrino_hierarchy, zed, 
-        kmin, kmax, knum, d_a, linear, del_mnu_max, sum_masses_central_t, 
+        kmin, kmax, knum, d_a, del_mnu_max, sum_masses_central_t, 
         kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_arr, N_eff_deviation)[0]
 
         highf = growth_rate(omega_b_t, omega_cdm_t, H0_t, As_t, m_nu_t+delta, neutrino_hierarchy, 
-        zed, kmin, kmax, knum, d_a, linear, del_mnu_max, sum_masses_central_t, 
+        zed, kmin, kmax, knum, d_a, del_mnu_max, sum_masses_central_t, 
         kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_arr, N_eff_deviation)[0]
 
         df_dmnu = (highf - lowf)/(2*delta)
         return df_dmnu
 
-    elif param == cosmo_variable.Obh:
+    elif param == cosmo_variable.Obh2:
         lowf = growth_rate(omega_b_t-delta, omega_cdm_t, H0_t, As_t, m_nu_t, neutrino_hierarchy, zed, 
-        kmin, kmax, knum, d_a, linear, del_mnu_max, sum_masses_central_t, 
+        kmin, kmax, knum, d_a, del_mnu_max, sum_masses_central_t, 
         kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_arr, N_eff_deviation)[0]
 
         highf = growth_rate(omega_b_t+delta, omega_cdm_t, H0_t, As_t, m_nu_t, neutrino_hierarchy, 
-        zed, kmin, kmax, knum, d_a, linear, del_mnu_max, sum_masses_central_t, 
+        zed, kmin, kmax, knum, d_a, del_mnu_max, sum_masses_central_t, 
         kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_arr, N_eff_deviation)[0]
 
         df_dob = (highf - lowf)/(2*delta)
         return df_dob
 
-    elif param == cosmo_variable.Och:
+    elif param == cosmo_variable.Och2:
         lowf = growth_rate(omega_b_t, omega_cdm_t-delta, H0_t, As_t, m_nu_t, neutrino_hierarchy, zed, 
-        kmin, kmax, knum, d_a, linear, del_mnu_max, sum_masses_central_t, 
+        kmin, kmax, knum, d_a, del_mnu_max, sum_masses_central_t, 
         kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_arr, N_eff_deviation)[0]
 
         highf = growth_rate(omega_b_t, omega_cdm_t+delta, H0_t, As_t, m_nu_t, neutrino_hierarchy, 
-        zed, kmin, kmax, knum, d_a, linear, del_mnu_max, sum_masses_central_t, 
+        zed, kmin, kmax, knum, d_a, del_mnu_max, sum_masses_central_t, 
         kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_arr, N_eff_deviation)[0]
 
         df_doc = (highf - lowf)/(2*delta)
@@ -464,11 +464,11 @@ m_nu_fid: float, mus_arr: npt.NDArray, N_eff_deviation: float):
 
     elif param == cosmo_variable.As:
         lowf = growth_rate(omega_b_t, omega_cdm_t, H0_t, As_t+delta, m_nu_t, neutrino_hierarchy, zed, 
-        kmin, kmax, knum, d_a, linear, del_mnu_max, sum_masses_central_t, 
+        kmin, kmax, knum, d_a, del_mnu_max, sum_masses_central_t, 
         kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_arr, N_eff_deviation)[0]
 
         highf = growth_rate(omega_b_t, omega_cdm_t, H0_t, As_t-delta, m_nu_t, neutrino_hierarchy, 
-        zed, kmin, kmax, knum, d_a, linear, del_mnu_max, sum_masses_central_t, 
+        zed, kmin, kmax, knum, d_a, del_mnu_max, sum_masses_central_t, 
         kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_arr, N_eff_deviation)[0]
 
         df_da = (highf - lowf)/(2*delta)
@@ -476,11 +476,11 @@ m_nu_fid: float, mus_arr: npt.NDArray, N_eff_deviation: float):
 
     elif param == cosmo_variable.Neff: # Neff
         lowf = growth_rate(omega_b_t, omega_cdm_t, H0_t, As_t, m_nu_t, neutrino_hierarchy, zed, 
-        kmin, kmax, knum, d_a, linear, del_mnu_max, sum_masses_central_t, 
+        kmin, kmax, knum, d_a, del_mnu_max, sum_masses_central_t, 
         kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_arr, -N_eff_deviation)[0]
 
         highf = growth_rate(omega_b_t, omega_cdm_t, H0_t, As_t, m_nu_t, neutrino_hierarchy, 
-        zed, kmin, kmax, knum, d_a, linear, del_mnu_max, sum_masses_central_t, 
+        zed, kmin, kmax, knum, d_a, del_mnu_max, sum_masses_central_t, 
         kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_arr, N_eff_deviation)[0]
 
         df_da = (highf - lowf)/(2*delta)
@@ -489,11 +489,11 @@ m_nu_fid: float, mus_arr: npt.NDArray, N_eff_deviation: float):
     elif param == cosmo_variable.n_s: # n_s
         
         lowf = growth_rate(omega_b_t, omega_cdm_t, H0_t, As_t, m_nu_t, neutrino_hierarchy, zed, 
-        kmin, kmax, knum, d_a, linear, del_mnu_max, sum_masses_central_t, 
+        kmin, kmax, knum, d_a, del_mnu_max, sum_masses_central_t, 
         kspaceoption, tau_t, ns_t-delta, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_arr, N_eff_deviation)[0]
 
         highf = growth_rate(omega_b_t, omega_cdm_t, H0_t, As_t, m_nu_t, neutrino_hierarchy, 
-        zed, kmin, kmax, knum, d_a, linear, del_mnu_max, sum_masses_central_t, 
+        zed, kmin, kmax, knum, d_a, del_mnu_max, sum_masses_central_t, 
         kspaceoption, tau_t, ns_t+delta, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_arr, N_eff_deviation)[0]
 
         df_da = (highf - lowf)/(2*delta)
@@ -506,7 +506,7 @@ m_nu_fid: float, mus_arr: npt.NDArray, N_eff_deviation: float):
 
 
 # get galaxy galaxy power spectrum / P_mm  (prefactor)
-def gg_redshift_s(bg: float, rg: float, f_t: npt.DNArray, sigmag: float, 
+def gg_redshift_s(bg: float, rg: float, f_t: npt.NDArray, sigmag: float, 
 mu: float, ks: npt.NDArray, q_para: float, q_perp: float): 
     'Function to get the prefactor for P_gg(k_fid).'  
     Dg2 = 1/(1 + ((ks*sigmag*mu)**2)/2)
@@ -517,7 +517,7 @@ mu: float, ks: npt.NDArray, q_para: float, q_perp: float):
 
 
 # get galaxy div velocity power spectrum / P_mm  (prefactor)
-def gu_redshift_s(bg: float, rg: float, f_t: npt.DNArray, sigmag: float, sigmau: float,
+def gu_redshift_s(bg: float, rg: float, f_t: npt.NDArray, sigmag: float, sigmau: float,
 mu: float, ks: npt.NDArray, z: float, H0_t: float, omegam_t: float, omegalambda_t: float, 
 q_para: float, q_perp: float): 
     'Function to get the prefactor for P_gu(k).'  
@@ -544,12 +544,12 @@ H0_t: float, omegam_t: float, omegalambda_t: float, q_para: float, q_perp: float
 
 
 # function to compute the derivative of real k (k = k(k_fid, z, cosmological parameters...)) with respect to cosmological parameters 
-def dk_obs_dx(param: cosmo_variable, dF_dx: float, dq_perp_dx: float, mu: float, k: float, F: float, q_perp: float):
+def dk_obs_dx(param: cosmo_variable, dF_dx: float, dq_perp_dx: float, mu: float, k: npt.NDArray, F: float, q_perp: float):
     '''
     Function to compute the derivative of k(k_fid, mu_fid, F_distortion_ratio) with respect
     to H0, Obh2, Och2 or Mnu.
     '''
-    if param == cosmo_variable.H0 or param == cosmo_variable.mnu or param == cosmo_variable.Obh or param == cosmo_variable.Och: #H0, Mnu, Obh, Och respectively
+    if param == cosmo_variable.H0 or param == cosmo_variable.mnu or param == cosmo_variable.Obh2 or param == cosmo_variable.Och2: #H0, Mnu, Obh, Och respectively
 
         p1 = np.sqrt( 1.0 + (mu**2)*( 1.0/(F**2)  - 1.0 ) )
         p2 = 1.0/p1
@@ -575,28 +575,33 @@ def dF_distortion_dx(param: cosmo_variable, F: float, H0_t: float, z: float, Om_
     D_a_z = angular_diameter_distance(Om_t, H0_t, z)
     c = 299792.458 # speed of light in km/s 
     
-    if param == cosmo_variable.H0: # H0
-       
-        res = 0.0
+    if z == 0:
+        return 0.0
+    
+    else: 
+    
+        if param == cosmo_variable.H0: # H0
+        
+            return 0.0 
 
-    elif param == cosmo_variable.mnu or param == cosmo_variable.Obh2 or param == cosmo_variable.Och2: # Mnu, Obh, Och
-        
-        functoint = lambda zi: H0_t * ((1.0 + zi)**3 - 1.0) * (1.0 / h_t**2) * -0.5 / E_z**3 
-        dinvEz_dx = ( 1.0*(1.0 + z)**3 -1.0 ) * (1.0 / h_t**2) * -0.5 / E_z**3 
-        if param == 2:
-            dinvEz_dx = ( 1.0*(1.0 + z)**3 -1.0 ) * (1.0 / (93.14 * h_t**2)) * -0.5 / E_z**3 
-            functoint = lambda zi: H0_t * ((1.0 + zi)**3 - 1.0) * (1.0 / (93.14 * h_t**2)) * -0.5 / E_z**3 
-        
-        integral = quad(functoint, 0.0, z)[0] 
-        integral = integral * (c / H0_t) * 1.0/(1.0 + z) 
-        res = F / D_a_z * integral - F * E_z * dinvEz_dx 
-        
-        return res
+        elif param == cosmo_variable.mnu or param == cosmo_variable.Obh2 or param == cosmo_variable.Och2: # Mnu, Obh, Och
+            
+            functoint = lambda zi: H0_t * ((1.0 + zi)**3 - 1.0) * (1.0 / h_t**2) * -0.5 / E_z**3 
+            dinvEz_dx = ( 1.0*(1.0 + z)**3 -1.0 ) * (1.0 / h_t**2) * -0.5 / E_z**3 
+            if param == 2:
+                dinvEz_dx = ( 1.0*(1.0 + z)**3 -1.0 ) * (1.0 / (93.14 * h_t**2)) * -0.5 / E_z**3 
+                functoint = lambda zi: H0_t * ((1.0 + zi)**3 - 1.0) * (1.0 / (93.14 * h_t**2)) * -0.5 / E_z**3 
+            
+            integral = quad(functoint, 0.0, z)[0] 
+            integral = integral * (c / H0_t) * 1.0/(1.0 + z) 
+            res = F / D_a_z * integral - F * E_z * dinvEz_dx 
+            
+            return res
 
-    else:
-        msg = 'param value (o) is probably not correct/ derivatie is zero. (dF_distortion_dx()).'
-        logger.error(msg)
-        raise (ValueError)
+        else:
+            msg = 'param value (o) is probably not correct/ derivatie is zero. (dF_distortion_dx()).'
+            logger.error(msg)
+            raise (ValueError)
         
 
 # function to compute the derivative of real mu with respect to cosmological parameters 
@@ -605,7 +610,7 @@ def dmu_obs_dx(dF_dx: float, mu: float, F: float, param: cosmo_variable):
     Function to compute the derivative of mu(mu_fid, F_distortion_ratio) with respect
     to H0, Obh2, Och2 or Mnu (all other derivatives = 0).
     '''
-    if param == cosmo_variable.H0 or param == cosmo_variable.Obh2 or param == cosmo_variable.Och2 or param == cosmo_variable.Mnu:
+    if param == cosmo_variable.H0 or param == cosmo_variable.Obh2 or param == cosmo_variable.Och2 or param == cosmo_variable.mnu:
         p1 = 1.0/np.sqrt( 1.0 + (mu**2)*( 1.0/(F**2) - 1.0 ))
         p2 = p1**3
         res = (- (mu/(F**2))*p1 + (((mu**3)/(F**4)))*p2 )*dF_dx 
@@ -627,25 +632,30 @@ Om_fid: float, z: float, c: float = 299792.458):
     D_a_real = angular_diameter_distance(Om_t, H0_t, z)
     D_a_fid = angular_diameter_distance(Om_fid, H0_fid, z)
     h_t = H0_t/100.0
-    q_perp = D_a_real/D_a_fid
+    q_perp = D_a_real/D_a_fid if D_a_fid != 0 else 1.0 
     E_z = get_Hubble_z(z, Om_t, H0_t)/H0_t 
     
     if param == cosmo_variable.H0: # H0
 
         res = -1.0*q_perp/(H0_t)
         return res 
-       
+        
     elif param == cosmo_variable.Obh2 or param == cosmo_variable.Och2 or param == cosmo_variable.mnu: # Mnu, Obh, Och
+            
+        if z == 0:
+            return 0.0
         
-        functoint = lambda zi: H0_t * ((1.0 + zi)**3 - 1.0) * (1.0 / h_t**2) * -0.5 / E_z**3 
-        if param == 2:
-            functoint = lambda zi: H0_t * ((1.0 + zi)**3 - 1.0) * (1.0 / (93.14 * h_t**2)) * -0.5 / E_z**3 
+        else: 
+            functoint = lambda zi: H0_t * ((1.0 + zi)**3 - 1.0) * (1.0 / h_t**2) * -0.5 / E_z**3 
+            if param == 2:
+                functoint = lambda zi: H0_t * ((1.0 + zi)**3 - 1.0) * (1.0 / (93.14 * h_t**2)) * -0.5 / E_z**3 
+            
+            integral = quad(functoint, 0.0, z)[0] 
+            integral = integral * (c / H0_t) * 1.0/(1.0 + z) 
+            
+            res = 1.0/(D_a_fid) * integral
         
-        integral = quad(functoint, 0.0, z)[0] 
-        integral = integral * (c / H0_t) * 1.0/(1.0 + z) 
-        
-        res = 1.0/(D_a_fid) * integral
-        return res 
+            return res 
             
     else:
         msg = 'param value (o) is probably not correct / derivative is zero. (dq_perp_distortion_dx()).'
@@ -665,6 +675,7 @@ def dq_para_distortion_dx(param: cosmo_variable, H0_t: float, H0_fid: float, Om_
     h = H0_t/100.0
     q_para = H_z_f/H_z_t
     E_z = H_z_t/H0_t
+    
 
     if param == cosmo_variable.H0: #H0
 
@@ -673,12 +684,16 @@ def dq_para_distortion_dx(param: cosmo_variable, H0_t: float, H0_fid: float, Om_
 
     elif param == cosmo_variable.Obh2 or param == cosmo_variable.Och2 or param == cosmo_variable.mnu: # Mnu, Obh or Och
 
-        dE2_dx = (1.0*(1.0 + z)**3 - 1.0) * (1.0/(h**2))
-        if param == 2:
-            dE2_dx = (1.0*(1.0 + z)**3 - 1.0) * (1.0/(93.14*h**2))
-            
-        res = -0.5 * q_para * dE2_dx / (E_z**2) 
-        return res
+        if z == 0:
+            return 0.0
+        
+        else: 
+            dE2_dx = (1.0*(1.0 + z)**3 - 1.0) * (1.0/(h**2))
+            if param == 2:
+                dE2_dx = (1.0*(1.0 + z)**3 - 1.0) * (1.0/(93.14*h**2))
+                
+            res = -0.5 * q_para * dE2_dx / (E_z**2) 
+            return res
 
     else:
         msg = 'param value (o) is probably not correct (dq_para_distortion_dx()).'
@@ -686,8 +701,8 @@ def dq_para_distortion_dx(param: cosmo_variable, H0_t: float, H0_fid: float, Om_
         raise (ValueError)
 
 # get derivatives of galaxy galaxy power spectrum w.r.t. relevant parameter (need to pass in P_mm and dP_dx)
-def dP_gg_dx(param: cosmo_variable, bg: float, rg: float, f_t: npt.NDArray, df_dx_t: npt.NDArray, mu_obs: npt.NDArray, k_obs: npt.NDArray, 
-sigmag: float, P_mm_t: npt.NDArray, dP_mm_dx_t: npt.NDArray, z: float, H0_t: float, dmu_obs_dx: npt.NDArray, dk_obs_dx: npt.NDArray, 
+def dP_gg_dx(param: cosmo_variable, bg: float, rg: float, f_t: npt.NDArray, df_dx_t: npt.NDArray, mu_obs: float, k_obs: npt.NDArray, 
+sigmag: float, P_mm_t: npt.NDArray, dP_mm_dx_t: npt.NDArray, z: float, H0_t: float, dmu_obs_dx: float, dk_obs_dx: npt.NDArray, 
 q_para: float, q_perp: float, dq_para_dx: float, dq_perp_dx: float): 
     ''' 
     Function to semi-analytically calculate dP_gg_dx where x is some parameter.
@@ -766,16 +781,16 @@ q_para: float, q_perp: float, dq_para_dx: float, dq_perp_dx: float):
 
         return res
 
-    elif param == cosmo_variable.sigmag: # varying sigma g
+    elif param == cosmo_variable.sigma_g: # varying sigma g
         Dg4 = Dg2**2
         res = -P_mm_t*( bg**2 + 2*rg*bg*f_t*(mu_obs**2) + (mu_obs**4)*(f_t**2))*( (sigmag*((mu_obs*k_obs)**2)) )*Dg4/(q_para*(q_perp**2))
         return res 
 
-    elif param == cosmo_variable.bias: # varying galaxy bias
+    elif param == cosmo_variable.b_g: # varying galaxy bias
         res = (2*bg + 2*rg*f_t*(mu_obs**2))*Dg2*P_mm_t/(q_para*(q_perp**2))
         return res
 
-    elif param == cosmo_variable.rg: # varying rg
+    elif param == cosmo_variable.r_g: # varying rg
         res = (2*bg*f_t*(mu_obs**2))*Dg2*P_mm_t/(q_para*(q_perp**2))
         return res
 
@@ -881,15 +896,15 @@ dk_obs_dx: npt.NDArray, dmu_obs_dx: float, q_para: float, q_perp: float, dq_para
 
         return res
 
-    elif param == cosmo_variable.sigmag: # varying sigma g
+    elif param == cosmo_variable.sigma_g: # varying sigma g
         res = -1.0*(1.0/(q_para*(q_perp**2)))*(a*H_z_t*mu_obs/(2*k_obs))*(rg*bg*f_t + (mu_obs*f_t)**2)*Du*P_mm_t*(sigmag*(mu_obs*k_obs)**2)/((np.sqrt(1 + ((mu_obs*sigmag*k_obs)**2)/2))**3)
         return res
 
-    elif param == cosmo_variable.bias: # varying galaxy bias
+    elif param == cosmo_variable.b_g: # varying galaxy bias
         res = (1.0/(q_para*(q_perp**2)))*a*H_z_t*mu_obs*rg*f_t*Du*P_mm_t*Dg/k_obs
         return res
 
-    elif param == cosmo_variable.rg: # varying rg
+    elif param == cosmo_variable.r_g: # varying rg
         res = (1.0/(q_para*(q_perp**2)))*(a*H_z_t*bg*f_t*Du*P_mm_t*mu_obs)*Dg/k_obs
         return res
 
@@ -911,7 +926,7 @@ dk_obs_dx: npt.NDArray, dmu_obs_dx: float, q_para: float, q_perp: float, dq_para
 
 # get derivatives of vel div. vel div. power spectrum w.r.t. relevant parameters (need to pass in P_thetatheta and dP_dx)
 def dP_uu_dx(param: cosmo_variable, mu_obs: float, k_obs: npt.NDArray, f_t: npt.NDArray, df_dx_t: npt.NDArray, sigmau: float, 
-P_mm_t: npt.NDArray, dP_mm_dx_t: npt.NDArray, H0_t: float, z: float, omegam_t: float, omegalambda_t: float, dk_obs_dx: float, dmu_obs_dx: float,
+P_mm_t: npt.NDArray, dP_mm_dx_t: npt.NDArray, H0_t: float, z: float, omegam_t: float, omegalambda_t: float, dk_obs_dx: npt.NDArray, dmu_obs_dx: float,
 q_para: float, q_perp: float, dq_para_dx: float, dq_perp_dx: float):
     ''' 
     Function to semi-analytically calculate dP_uu_dx where x is some parameter.
@@ -976,7 +991,7 @@ q_para: float, q_perp: float, dq_para_dx: float, dq_perp_dx: float):
         return res
 
     elif param == cosmo_variable.sigma_u: # varying sigma_u
-        res = (1.0/(q_para*(q_perp**2)))*((a*H_z_t*mu_obs*f_t/k_obs)**2)*(2*np.sinc(k_obs*sigma_u/np.pi))*(k_obs*sigma_u*np.cos(k_obs*sigma_u) - np.sin(k_obs*sigma_u))*P_mm_t/(k_obs*(sigma_u**2))
+        res = (1.0/(q_para*(q_perp**2)))*((a*H_z_t*mu_obs*f_t/k_obs)**2)*(2*np.sinc(k_obs*sigmau/np.pi))*(k_obs*sigmau*np.cos(k_obs*sigmau) - np.sin(k_obs*sigmau))*P_mm_t/(k_obs*(sigmau**2))
         return res
 
     elif param == cosmo_variable.Neff or param == cosmo_variable.n_s: # varying Neff or varying ns
@@ -1054,15 +1069,15 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
         plot2 = False
     num_steps = 7  # number of intervals slices we divide our parameter that we vary into (allows for 
     # 3 step sizes about the central value)
-    ks = []
+    ks_fiducial = []
 
 
     # set up either logarithmic or linear spacing for the ks (depending on what the user prefers, logarithmic
     # is better for plotting a smooth power spectrum on a log scale)
     if kspaceoption == 'log':
-        ks = np.logspace(np.log10(kmin), np.log10(kmax), num_k_points, base=10) # k values (k in 1/MPC)
+        ks_fiducial = np.logspace(np.log10(kmin), np.log10(kmax), num_k_points, base=10) # k values (k in 1/MPC)
     else:
-        ks = np.linspace(kmin, kmax, num_k_points)
+        ks_fiducial = np.linspace(kmin, kmax, num_k_points)
 
     mus = np.linspace(0, 1, num_mus) # set the mu values 
 
@@ -1081,7 +1096,7 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
         param_variation = np.linspace(Obh_central-delta_max_param, Obh_central+delta_max_param, num_steps)
     elif o == cosmo_variable.Och2: # varying omega_cdm
         param_variation = np.linspace(Och_central-delta_max_param, Och_central+delta_max_param, num_steps)
-    elif o == cosmo_variable.sigmag: # varying sigma_g
+    elif o == cosmo_variable.sigma_g: # varying sigma_g
         param_variation = np.linspace(sigmag_central-delta_max_param, sigmag_central+delta_max_param, num_steps)
     elif o == cosmo_variable.b_g: # galaxy bias
         param_variation = np.linspace(bg_central-delta_max_param, bg_central+delta_max_param, num_steps)
@@ -1108,13 +1123,13 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
 
     # initialise arrays to store results to later -----------------------------------------------
 
-    # store matter power spectrum for all k_real, mu_real, and values of varying parameter
+    # store matter power spectrum for all k_obs, mu_obs, and values of varying parameter
     matter_power_spectrum_arr = np.zeros((num_steps, num_mus, num_k_points))
 
-    # store real ks
+    # store observed ks
     ks_obs_arr = np.zeros((num_steps, num_mus, num_k_points))
 
-    # store real mus 
+    # store observed mus
     mus_obs_arr = np.zeros((num_steps, num_mus))
 
     # store growth rates
@@ -1169,7 +1184,7 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
             Obh = param_variation[i]
         elif o == cosmo_variable.Och2:
             Och = param_variation[i]
-        elif o == cosmo_variable.sigmag:
+        elif o == cosmo_variable.sigma_g:
             sigmag = param_variation[i]/h # MPC
         elif o == cosmo_variable.b_g:
             bg = param_variation[i]
@@ -1191,13 +1206,14 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
         Pk_cb, ks, mus = run_class(Obh, Och, H0, As, mnu, neutrino_hier, [z], kmin, kmax, num_k_points,
         delta_mnu_max, mnu_central, kspaceoption, tau, ns_val, Obh_central, Och_central, H0_central, As_central, mnu_central, mus, lin_or_nonlin,
         N_eff_deviation)
+        #print(mus.shape)
 
-        f = growth_rate(Obh, Och, H0, As, mnu, neutrino_hier, z, kmin, kmax, num_k_points, da, linear,
+        f = growth_rate(Obh, Och, H0, As, mnu, neutrino_hier, z, kmin, kmax, num_k_points, da,
         delta_mnu_max, mnu_central, kspaceoption, tau, ns_val, Obh_central, Och_central, H0_central, As_central, mnu_central, mus,
         N_eff_deviation)[0]
 
 
-        if Pk_cb.shape == (num_mus, num_k_points, 1) and ks.shape == (num_mus, num_k_points, 1) and mus.shape == (num_mus, 1) and f.shape == (num_mus, num_k_points):
+        if Pk_cb.shape == (num_mus, num_k_points, 1) and ks.shape == (num_mus, num_k_points, 1) and f.shape == (num_mus, num_k_points):
 
             matter_power_spectrum_arr[i,:,:] = Pk_cb[:,:,0] # storing the matter power spectrum for all ks and mus (real)
             ks_obs_arr[i,:,:] = ks[:,:,0]
@@ -1205,8 +1221,9 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
             growth_rates_arr[i,:,:] = f
 
 
-        elif Pk_cb.shape == (num_k_points, 1) and ks.shape == (num_k_points,) and mus.shape == (num_mus,) and f.shape == (num_k_points,):
+        elif Pk_cb.shape == (num_k_points, 1) and ks.shape == (num_k_points,) and f.shape == (num_k_points,):
 
+            mus = mus.flatten()
             for muu in np.arange(num_mus):
                 matter_power_spectrum_arr[i,muu,:] = Pk_cb[:,0] # just storing the same matter power spectrum since the k modes don't change with mu
                 ks_obs_arr[i,muu,:] = ks 
@@ -1316,16 +1333,16 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
         if o in [cosmo_variable.H0, cosmo_variable.As, cosmo_variable.Och2, 
                   cosmo_variable.Obh2, cosmo_variable.mnu, cosmo_variable.n_s, cosmo_variable.Neff]: # varying cosmological parameter x = non-zero df_dx
             # getting derivative of the growth rate w.r.t. parameter being varied
-            if o in [cosmo_variable.H0, cosmo_variable.Och2, cosmo_variable.Obh2, cosmo_variable.mnu, cosmo_variable.As]:
-                df_dx = derivative_growth_rate(o, stepsize, Obh, Och, H0, As, mnu, neutrino_hier, 
-                z, kmin, kmax, num_k_points, da, linear, delta_mnu_max, 
-                mnu_central, kspaceoption, tau, ns, Obh_central, Och_central, H0_central, As_central, mnu_central,
-                mus, N_eff_deviation)
-            elif o == cosmo_variable.Neff or o == cosmo_variable.n_s:
-                df_dx[:,:] = derivative_growth_rate(o, stepsize, Obh, Och, H0, As, mnu, neutrino_hier, 
-                z, kmin, kmax, num_k_points, da, linear, delta_mnu_max, 
-                mnu_central, kspaceoption, tau, ns, Obh_central, Och_central, H0_central, As_central, mnu_central,
-                mus, N_eff_deviation)
+            # if o in [cosmo_variable.H0, cosmo_variable.Och2, cosmo_variable.Obh2, cosmo_variable.mnu, cosmo_variable.As]:
+            #     df_dx = derivative_growth_rate(o, stepsize, Obh, Och, H0, As, mnu, neutrino_hier, 
+            #     z, kmin, kmax, num_k_points, da, linear, delta_mnu_max, 
+            #     mnu_central, kspaceoption, tau, ns, Obh_central, Och_central, H0_central, As_central, mnu_central,
+            #     mus, N_eff_deviation)
+            # elif o == cosmo_variable.Neff or o == cosmo_variable.n_s:
+            df_dx = derivative_growth_rate(o, stepsize, Obh, Och, H0, As, mnu, neutrino_hier, 
+            z, kmin, kmax, num_k_points, da, linear, delta_mnu_max, 
+            mnu_central, kspaceoption, tau, ns, Obh_central, Och_central, H0_central, As_central, mnu_central,
+            mus, N_eff_deviation)
             if o in [cosmo_variable.H0, cosmo_variable.Och2, cosmo_variable.Obh2, cosmo_variable.mnu]:
                 dF_dx = dF_distortion_dx(o, F, H0, z, omegam)
                 Om_f = get_Om_0(Obh_central, Och_central, mnu_central, H0_central) 
@@ -1343,31 +1360,33 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
         for muu in np.arange(len(mus)): 
 
 
-            dk_r_dx = 0
-            dmu_r_dx = 0
+            dkobs_dx = 0
+            dmuobs_dx = 0
                 
-            if o < 5:
-                dk_r_dx = dk_obs_dx(o, dF_dx, dq_perp_dx, mus_obs_arr[:,muu], ks_fiducial, F, q_perp, q_parallel)
-                dmu_r_dx =dmu_obs_dx(dF_dx, mus[muu], F, o, q_parallel, q_perp, ks_fiducial)
-                    
+            if o in [cosmo_variable.H0, cosmo_variable.Och2, cosmo_variable.Obh2, cosmo_variable.mnu]: # k and mu only change w.r.t. these cosmological parameters
+                
+                dkobs_dx = dk_obs_dx(o, dF_dx, dq_perp_dx, mus[muu], ks_fiducial, F, q_perp)
+                dmuobs_dx =dmu_obs_dx(dF_dx, mus[muu], F, o)
+                
             else:
-                dk_r_dx = 0
-                dmu_r_dx = 0
+                dkobs_dx = 0
+                dmuobs_dx = 0
                 
-            if P == cosmo_variable.P_gg:
+            if P == RSPS_variable.P_gg:
+                
                 results_findiff_semi_analytic_derivatives[i, muu, :] = dP_gg_dx(o, bg, rg, growth_rates_arr[3, muu, :], df_dx[muu,:],
                 mus_obs_arr[3,muu], ks_obs_arr[3, muu, :], sigmag, matter_power_spectrum_arr[3,muu,:], matter_central_diffs[i, muu,:],
-                z, H0, dmu_r_dx, dk_r_dx, q_parallel, q_perp, dq_para_dx, dq_perp_dx)
-                
-            if P == cosmo_variable.P_ug:
+                z, H0, dmuobs_dx, dkobs_dx, q_parallel, q_perp, dq_para_dx, dq_perp_dx)
+            
+            if P == RSPS_variable.P_ug:
                 results_findiff_semi_analytic_derivatives[i, muu, :] = dP_gu_dx(o, bg, rg, growth_rates_arr[3,muu,:], df_dx[muu,:], 
                 mus_obs_arr[3,muu], ks_obs_arr[3,muu,:], sigmag, sigmau, matter_power_spectrum_arr[3, muu, :], 
-                matter_central_diffs[i, muu, :], H0, z, omegam, 1.0-omegam, dk_r_dx, dmu_r_dx, q_parallel, q_perp, dq_para_dx, dq_perp_dx)
+                matter_central_diffs[i, muu, :], H0, z, omegam, 1.0-omegam, dkobs_dx, dmuobs_dx, q_parallel, q_perp, dq_para_dx, dq_perp_dx)
                     
-            if P == cosmo_variable.P_uu:
+            if P == RSPS_variable.P_uu:
                 results_findiff_semi_analytic_derivatives[i, muu, :] = dP_uu_dx(o, mus_obs_arr[3, muu], ks_obs_arr[3, muu, :], 
                 growth_rates_arr[3,muu,:], df_dx[muu,:], sigmau, matter_power_spectrum_arr[3, muu, :], matter_central_diffs[i, muu, :],
-                H0, z, omegam, 1.0-omegam, dk_r_dx, dmu_r_dx, q_parallel, q_perp, dq_para_dx, dq_perp_dx)
+                H0, z, omegam, 1.0-omegam, dkobs_dx, dmuobs_dx, q_parallel, q_perp, dq_para_dx, dq_perp_dx)
 
 
 
@@ -1376,14 +1395,14 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
     
     mapping_P = {RSPS_variable.P_gg: 0, RSPS_variable.P_ug: 1, RSPS_variable.P_uu: 2} 
     mapping_var = {cosmo_variable.H0: 0, cosmo_variable.mnu: 1, cosmo_variable.Obh2: 2, cosmo_variable.Och2: 3, 
-    cosmo_variable.sigmag: 4, cosmo_variable.b_g: 5, cosmo_variable.r_g: 6, cosmo_variable.sigma_u: 7, cosmo_variable.As: 8, 
+    cosmo_variable.sigma_g: 4, cosmo_variable.b_g: 5, cosmo_variable.r_g: 6, cosmo_variable.sigma_u: 7, cosmo_variable.As: 8, 
     cosmo_variable.Neff: 9, cosmo_variable.n_s: 10} 
 
     if plot1 == True:  # plot some of the derivatives
 
-        ks_real_arr /= (H0_central/100.0) # put ks into units of k/h MPc
-        results_findiff_derivatives /= (H0_central/100.0)**3 # putting into units of (MPC/h)^3/x
-        results_findiff_semi_analytic_derivatives /= (H0_central/100.0)**3 # putting into units of (MPC/h)^3/x, x being the units of the parameter
+        ks_obs_arr /= (H0_central/100.0) # put ks into units of k/h MPc
+        results_findiff_derivatives *= (H0_central/100.0)**3 # putting into units of (MPC/h)^3/x
+        results_findiff_semi_analytic_derivatives *= (H0_central/100.0)**3 # putting into units of (MPC/h)^3/x, x being the units of the parameter
         ks_fiducial /= (H0_central/100.0) # put ks into units of k/h MPc
         # that is being varied 
 
@@ -1408,7 +1427,7 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
                 label = (r"$\Delta \Omega_bh^2 = %.6f $ - M1" %  (deltas[j]) ) 
             if o == cosmo_variable.Och2:
                 label = (r"$\Delta \Omega_{cdm}h^2 = %.3f $ - M1" %  (deltas[j]) ) 
-            if o == cosmo_variable.sigmag:
+            if o == cosmo_variable.sigma_g:
                 label = (r"$\Delta \sigma_g = %.3f $ - M1" %  (deltas[j]) ) 
             if o == cosmo_variable.b_g:
                 label = (r"$\Delta b_g=%.3f $ - M1" %  (deltas[j]) ) 
@@ -1444,7 +1463,7 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
                 label = (r"$\Delta \Omega_bh^2 = %.6f $ - M2" %  ( deltas[j])) 
             if o == cosmo_variable.Och2:
                 label = (r"$\Delta \Omega_{cdm}h^2 = %.3f $ - M2" %  (deltas[j]) ) 
-            if o == cosmo_variable.sigmag:
+            if o == cosmo_variable.sigma_g:
                 label = (r"$\Delta \sigma_g = %.3f $ - M2" %  (deltas[j]) ) 
             if o == cosmo_variable.b_g:
                 label = (r"$\Delta b_g=%.3f $ - M2" %  (deltas[j]) ) 
@@ -1527,8 +1546,10 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
     elif plot2 == True:
 
         h = H0_central/100.0 # need to initialise little h
-        results_findiff_derivatives *= (h)**3 # putting into units of (MPC/h)^3/x
-        results_findiff_semi_analytic_derivatives *= (h)**3 # putting into units of (MPC/h)^3/x, x being the units of the parameter
+        #results_findiff_derivatives *= (h)**3 # putting into units of (MPC/h)^3/x
+        #results_findiff_semi_analytic_derivatives *= (h)**3 # putting into units of (MPC/h)^3/x, x being the units of the parameter
+        #ks_obs_arr /= (H0_central/100.0) # put ks into units of k/h MPc 
+        #ks_fiducial /= (H0_central/100.0) # put ks into units of k/h MPc
         # that is being varied 
     
         # getting mus we would like to plot 
@@ -1571,7 +1592,7 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
                 label = (r"$\Delta \Omega_bh^2 = %.5f $," %  (deltas[j]) + " M1" ) 
             if o == cosmo_variable.Och2:
                 label = (r"$\Delta \Omega_{cdm}h^2 = %.3f $," %  (deltas[j]) + " M1" ) 
-            if o == cosmo_variable.sigmag:
+            if o == cosmo_variable.sigma_g:
                 label = (r"$\Delta \sigma_g = %.3f $," %  (deltas[j]) + " M1" ) 
             if o == cosmo_variable.b_g:
                 label = (r"$\Delta b_g=%.3f $," %  (deltas[j]) + " M1" ) 
@@ -1618,7 +1639,7 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
                 label = (r"$\Delta \Omega_bh^2 = %.5f $," %  ( deltas[j]) + " M2") 
             if o == cosmo_variable.Och2:
                 label = (r"$\Delta \Omega_{cdm}h^2 = %.3f $," %  (deltas[j]) + " M2" ) 
-            if o == cosmo_variable.sigmag:
+            if o == cosmo_variable.sigma_g:
                 label = (r"$\Delta \sigma_g = %.3f $," %  (deltas[j]) + " M2" ) 
             if o == cosmo_variable.b_g:
                 label = (r"$\Delta b_g=%.3f $," %  (deltas[j]) + " M2"  ) 
@@ -2234,28 +2255,28 @@ if __name__ == "__main__":
     # H0 = 1, neutrinos = 2, baryons = 3, CDM = 4, sigmag = 5, bg = 6, rg = 7, sigmau = 8, As = 9
    
     # H0 
-    #derivative_power_spectra(11, 1, 0.0, 'plot2', params, 0.01, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    derivative_power_spectra(cosmo_variable.H0, RSPS_variable.P_gg, 0.2, 'plot2', params, 2.5, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
     # mnu
-    #derivative_power_spectra(2, 1, 0.0, 'plot2', params, 0.0025, 1.0e-4, 1.0, 2000, 100, 0.0001, 'inverted', 'linear', 'log', tau, ns)
-    # Obh   
-    #derivative_power_spectra(3, 1, 0.0, 'plot2', params, 0.00012, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    derivative_power_spectra(cosmo_variable.mnu, RSPS_variable.P_gg, 0.2, 'plot2', params, 0.003, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    # Obh
+    derivative_power_spectra(cosmo_variable.Obh2, RSPS_variable.P_gg, 0.2, 'plot2', params, 0.0006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
     # Och
-    #derivative_power_spectra(4, 1, 0.0, 'plot2', params, 0.006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    derivative_power_spectra(cosmo_variable.Och2, RSPS_variable.P_gg, 0.2, 'plot2', params, 0.006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
     
 
     # other parameters
     # sigmag
-    #derivative_power_spectra(5, 1, 0.5, 'plot1', params, 0.1, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    #derivative_power_spectra(cosmo_variable.sigma_g, RSPS_variable.P_gg, 0.2, 'plot2', params, 0.1, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
     # bg
-    #derivative_power_spectra(6, 2, 1.0, 'plot1', params, 0.1, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    #derivative_power_spectra(cosmo_variable.b_g, RSPS_variable.P_gg, 0.2, 'plot2', params, 0.1, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
     # rg
     #derivative_power_spectra(7, 1, 0.0, 'plot1', params, 0.1, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
     # sigmau
-    #derivative_power_spectra(8, 2, 0.0, 'plot1', params, 0.1, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    #derivative_power_spectra(cosmo_variable.sigma_u, RSPS_variable.P_ug, 0.2, 'plot2', params, 0.1, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
     # As
-    #derivative_power_spectra(9, 1, 0.0, 'plot2', params, 0.1*1e-10, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    #derivative_power_spectra(cosmo_variable.As, RSPS_variable.P_gg, 0.2, 'plot2', params, 0.1*1e-10, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
     # N_eff
-    #derivative_power_spectra(10, 3, 0.0, 'plot2', params, 0.001, 1e-4, 0.2*(0.6732), 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    derivative_power_spectra(cosmo_variable.Neff, RSPS_variable.P_gg, 0.2, 'plot2', params, 0.001, 1e-4, 0.2*(0.6732), 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
 
     # print(pk.shape)
     # print(k.shape)

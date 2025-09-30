@@ -8,7 +8,7 @@ import os
 import numpy as np
 import pickle
 from rich.console import Console
-from strenum import StrEnum
+from enum import StrEnum
 cosmo_variable = StrEnum("variable", "H0 As Och2 Obh2 mnu Neff n_s b_g r_g sigma_u sigma_g")
 
 #--------------------------------------------------------------------------------------------------------------------------------------
@@ -191,7 +191,7 @@ forecasting_params = {
     'survey_area':survey_area,                                  
     'error_rand': error_rand, 
     'error_dist': error_dist,
-    'Data': Data,
+    #'Data': Data,
     'nparams': nparams,
     'verbosity': verbosity,
     'dm2_atm': dm2_atm,
