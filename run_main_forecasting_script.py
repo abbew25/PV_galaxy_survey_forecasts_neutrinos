@@ -8,6 +8,8 @@ import os
 import numpy as np
 import pickle
 from rich.console import Console
+from strenum import StrEnum
+cosmo_variable = StrEnum("variable", "H0 As Och2 Obh2 mnu Neff n_s b_g r_g sigma_u sigma_g")
 
 #--------------------------------------------------------------------------------------------------------------------------------------
 
@@ -103,17 +105,17 @@ error_dist = 0.20                               # The percentage error on the di
 #  A list of flags for the parameters we are interested in varying in the analysis/free parameters - comment out parameters you don't want
 # Ordering of parameters here is best and shouldn't be altered, just comment out lines for parameters you do not want to include in forecasting analysis.
 Data = [                                        
-0,                # H0
-1,                # As
-2,                # Obh
-3,                # Och
-4,                # mnu
-13,               # N_eff (effective number of neutrino species)  
-14,               # ns
-7,                # galaxy bias b_g
-#8,                # r_g 
-9,                # sigmau
-10,               # sigmag                          
+    cosmo_variable.H0,                  # H0
+    cosmo_variable.As,                  # As
+    cosmo_variable.Obh2,                # Obh
+    cosmo_variable.Och2,                # Och
+    cosmo_variable.mnu,                 # mnu
+    cosmo_variable.Neff,                # N_eff (effective number of neutrino species)  
+    cosmo_variable.n_s,                 # ns
+    cosmo_variable.b_g,                 # galaxy bias b_g
+    #cosmo_variable.r_g,                 # r_g
+    cosmo_variable.sigma_u,             # sigma_u
+    cosmo_variable.sigma_g,             # sigma_g
         ] 
 
 

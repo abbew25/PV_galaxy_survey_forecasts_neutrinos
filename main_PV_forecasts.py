@@ -16,7 +16,23 @@ from loguru import logger
 from rich.console import Console
 from enum import StrEnum
 skiprows = 1  # number of rows skipped when reading in number density files in read_nz()
+cosmo_variable = StrEnum("variable", "H0 As Och2 Obh2 mnu Neff n_s b_g r_g sigma_u sigma_g")
 
+mapping_index_dict = { 
+    cosmo_variable.H0: 0,
+    cosmo_variable.As: 1,
+    cosmo_variable.Obh2: 2,
+    cosmo_variable.Och2: 3,
+    cosmo_variable.mnu: 4,
+    cosmo_variable.Neff: 13,
+    cosmo_variable.n_s: 14,
+    cosmo_variable.b_g: 7,
+    cosmo_variable.r_g: 8,
+    cosmo_variable.sigma_u: 9,
+    cosmo_variable.sigma_g: 10
+} 
+ 
+ 
 #--------------------------------------------------------------------------------------------------------------------------------------
 # importing settings 
 console = Console(style="blue")
@@ -197,7 +213,7 @@ def get_Planck18_MCMC(Data_list: list):
         chain4 = pd.read_csv((cwd + r'/Planck_files/base_mnu/plikHM_TTTEEE_lowl_lowE/base_mnu_plikHM_TTTEEE_lowl_lowE_4.txt'), 
         sep="    ", header=None, engine = 'python')
 
-        if 13 in Data:
+        if 13 in Data_list:
 
             ws___index = 0
             Obh2_index = 0+2
@@ -619,7 +635,7 @@ def read_power():
 
 
 
-    if 0 in Data:
+    if cosmo_variable.H0 in Data:
 
         
         # make a string with values of parameters + step size of cosmological variable in consideration 
@@ -634,7 +650,7 @@ def read_power():
 
         except:
 
-            dPdH_arr_gg, dPdH_arr_gu, dPdH_arr_uu = cosmo.get_rsp_dP_dx_cosmo_many_redshifts(1, N_redshifts_arr, central_params, del_H0, k1, k2, 
+            dPdH_arr_gg, dPdH_arr_gu, dPdH_arr_uu = cosmo.get_rsp_dP_dx_cosmo_many_redshifts(cosmo_variable.H0, N_redshifts_arr, central_params, del_H0, k1, k2, 
             numk_vals, mus, d_a, n_h, lin_or_nonlin, 'lin_ks', tau, ns, 0.0, dm2_atm, dm2_sol)[0:3]
 
             dictionary_2_store_derivatives = { 'dPdH_arr_gg': dPdH_arr_gg, 
@@ -647,8 +663,7 @@ def read_power():
 
 
 
-
-    if 1 in Data:
+    if cosmo_variable.As in Data:
 
         # make a string with values of parameters + step size of cosmological variable in consideration 
 
@@ -663,7 +678,7 @@ def read_power():
         except: 
 
             
-            dPdAs_arr_gg, dPdAs_arr_gu, dPdAs_arr_uu = cosmo.get_rsp_dP_dx_cosmo_many_redshifts(9, N_redshifts_arr, central_params, del_As, k1, k2, 
+            dPdAs_arr_gg, dPdAs_arr_gu, dPdAs_arr_uu = cosmo.get_rsp_dP_dx_cosmo_many_redshifts(cosmo_variable.As, N_redshifts_arr, central_params, del_As, k1, k2, 
             numk_vals, mus, d_a, n_h, lin_or_nonlin, 'lin_ks', tau, ns, 0.0, dm2_atm, dm2_sol)[0:3]
 
             dictionary_2_store_derivatives = { 'dPdAs_arr_gg': dPdAs_arr_gg, 
@@ -675,10 +690,9 @@ def read_power():
                 pickle.dump( dictionary_2_store_derivatives, open(check_str, 'wb') )
 
 
+    if cosmo_variable.Obh2 in Data:
 
-    if 2 in Data:
-        
-        # make a string with values of parameters + step size of cosmological variable in consideration 
+        # make a string with values of parameters + step size of cosmological variable in consideration
 
         check_str = CCStr + '_' + 'deltaObh2' + '_' + str(del_Obh2) + '_.p'
 
@@ -691,7 +705,7 @@ def read_power():
         except:
 
 
-            dPdObh2_arr_gg, dPdObh2_arr_gu, dPdObh2_arr_uu = cosmo.get_rsp_dP_dx_cosmo_many_redshifts(3, N_redshifts_arr, central_params, del_Obh2, k1, k2, 
+            dPdObh2_arr_gg, dPdObh2_arr_gu, dPdObh2_arr_uu = cosmo.get_rsp_dP_dx_cosmo_many_redshifts(cosmo_variable.Obh2, N_redshifts_arr, central_params, del_Obh2, k1, k2, 
             numk_vals, mus, d_a, n_h, lin_or_nonlin, 'lin_ks', tau, ns, 0.0, dm2_atm, dm2_sol)[0:3]
 
 
@@ -704,7 +718,7 @@ def read_power():
                 pickle.dump( dictionary_2_store_derivatives, open(check_str, 'wb') )
 
 
-    if 3 in Data:
+    if cosmo_variable.Och2 in Data:
         
         # make a string with values of parameters + step size of cosmological variable in consideration 
 
@@ -719,7 +733,7 @@ def read_power():
         except:
 
             
-            dPdOch2_arr_gg, dPdOch2_arr_gu, dPdOch2_arr_uu = cosmo.get_rsp_dP_dx_cosmo_many_redshifts(4, N_redshifts_arr, central_params, del_Och2, k1, k2, 
+            dPdOch2_arr_gg, dPdOch2_arr_gu, dPdOch2_arr_uu = cosmo.get_rsp_dP_dx_cosmo_many_redshifts(cosmo_variable.Och2, N_redshifts_arr, central_params, del_Och2, k1, k2, 
             numk_vals, mus, d_a, n_h, lin_or_nonlin, 'lin_ks', tau, ns, 0.0, dm2_atm, dm2_sol)[0:3]
 
 
@@ -733,7 +747,7 @@ def read_power():
                 pickle.dump( dictionary_2_store_derivatives, open(check_str, 'wb') )
 
 
-    if 4 in Data:
+    if cosmo_variable.mnu in Data:
 
         # make a string with values of parameters + step size of cosmological variable in consideration 
 
@@ -748,7 +762,7 @@ def read_power():
         except:
 
 
-            dPdMnu_arr_gg, dPdMnu_arr_gu, dPdMnu_arr_uu = cosmo.get_rsp_dP_dx_cosmo_many_redshifts(2, N_redshifts_arr, central_params, del_Mnu, k1, k2, 
+            dPdMnu_arr_gg, dPdMnu_arr_gu, dPdMnu_arr_uu = cosmo.get_rsp_dP_dx_cosmo_many_redshifts(cosmo_variable.mnu, N_redshifts_arr, central_params, del_Mnu, k1, k2, 
             numk_vals, mus, d_a, n_h, lin_or_nonlin, 'lin_ks', tau, ns, 0.0, dm2_atm, dm2_sol)[0:3]
 
             
@@ -761,7 +775,7 @@ def read_power():
                 pickle.dump( dictionary_2_store_derivatives, open(check_str, 'wb') )
 
 
-    if 13 in Data:
+    if cosmo_variable.Neff in Data:
 
         # make a string with values of parameters + step size of cosmological variable in consideration 
 
@@ -776,7 +790,7 @@ def read_power():
         except:
 
 
-            dPdNeff_arr_gg, dPdNeff_arr_gu, dPdNeff_arr_uu = cosmo.get_rsp_dP_dx_cosmo_many_redshifts(10, N_redshifts_arr, central_params, del_Neff, k1, k2, 
+            dPdNeff_arr_gg, dPdNeff_arr_gu, dPdNeff_arr_uu = cosmo.get_rsp_dP_dx_cosmo_many_redshifts(cosmo_variable.Neff, N_redshifts_arr, central_params, del_Neff, k1, k2, 
             numk_vals, mus, d_a, n_h, lin_or_nonlin, 'lin_ks', tau, ns, 0.0, dm2_atm, dm2_sol)[0:3]
 
             
@@ -788,7 +802,7 @@ def read_power():
                 
                 pickle.dump( dictionary_2_store_derivatives, open(check_str, 'wb') )
 
-    if 14 in Data:
+    if cosmo_variable.n_s in Data:
 
         check_str = CCStr + '_' + 'delta_ns' + '_' + str(del_ns) + '_.p'
 
@@ -800,8 +814,7 @@ def read_power():
 
         except:
 
-
-            dPdns_arr_gg, dPdns_arr_gu, dPdns_arr_uu = cosmo.get_rsp_dP_dx_cosmo_many_redshifts(11, N_redshifts_arr, central_params, del_ns, k1, k2, 
+            dPdns_arr_gg, dPdns_arr_gu, dPdns_arr_uu = cosmo.get_rsp_dP_dx_cosmo_many_redshifts(cosmo_variable.n_s, N_redshifts_arr, central_params, del_ns, k1, k2, 
             numk_vals, mus, d_a, n_h, lin_or_nonlin, 'lin_ks', tau, ns, 0.0, dm2_atm, dm2_sol)[0:3]
 
             
@@ -913,7 +926,7 @@ def z_eff_integrand(mu: float, datalist1: list):
 
 
 # get covariance matrix derivatives 
-def get_dCdx_matrix_elements(val_o: int, list_vals: list):
+def get_dCdx_matrix_elements(val_o: cosmo_variable, list_vals: list):
     '''
     Function to get the values for the derivatives of the covariance matrices.
     '''
@@ -925,35 +938,35 @@ def get_dCdx_matrix_elements(val_o: int, list_vals: list):
     m1, m2, m3, m4 = 0, 0, 0, 0
 
     # get the derivatives for all values of mu at fixed z and fixed k
-    if val_o == 0:  # H0 
+    if val_o == cosmo_variable.H0:  # H0
         
         m1 = dPdH_arr_gg[:,kindex, zindex]
         m2 = dPdH_arr_gu[:,kindex, zindex]
         m3 = m2
         m4 = dPdH_arr_uu[:,kindex, zindex]
     
-    elif val_o == 1: # As
+    elif val_o == cosmo_variable.As: # As
         
         m1 = dPdAs_arr_gg[:,kindex, zindex]
         m2 = dPdAs_arr_gu[:,kindex, zindex]
         m3 = m2
         m4 = dPdAs_arr_uu[:,kindex, zindex]
 
-    elif val_o == 2: # Obh2
+    elif val_o == cosmo_variable.Obh2: # Obh2
         
         m1 = dPdObh2_arr_gg[:,kindex, zindex]
         m2 = dPdObh2_arr_gu[:,kindex, zindex]
         m3 = m2
         m4 = dPdObh2_arr_uu[:,kindex, zindex]
 
-    elif val_o == 3: # Och2
+    elif val_o == cosmo_variable.Och2: # Och2
 
         m1 = dPdOch2_arr_gg[:,kindex, zindex]
         m2 = dPdOch2_arr_gu[:,kindex, zindex]
         m3 = m2
         m4 = dPdOch2_arr_uu[:,kindex, zindex]
         
-    elif val_o == 4: # mnu
+    elif val_o == cosmo_variable.mnu: # mnu
         
         m1 = dPdMnu_arr_gg[:,kindex, zindex]
         m2 = dPdMnu_arr_gu[:,kindex, zindex]
@@ -962,7 +975,7 @@ def get_dCdx_matrix_elements(val_o: int, list_vals: list):
 
 
 
-    elif val_o == 7: # b_g (calculate analytically) 
+    elif val_o == cosmo_variable.b_g: # b_g (calculate analytically)
 
         a = 1.0/(1.0 + zvalv)
         H_z = H0*E_z(zvalv)
@@ -973,26 +986,22 @@ def get_dCdx_matrix_elements(val_o: int, list_vals: list):
         m4 = 0
         
 
-    elif val_o == 8: # rg (calculate analytically) 
-
-        o = 7
+    elif val_o == cosmo_variable.r_g: # rg (calculate analytically)
 
         df_dx = 0
         dp_mm_dx = 0
         dmu_real_dx = 0
         dk_real_dx = 0
 
-        m1 = cosmo.dP_gg_dx(o, b_g_z, r_g, f, df_dx, muv, kv, sigma_gh/h, pmmv, dp_mm_dx, zvalv, H0, dmu_real_dx, 
+        m1 = cosmo.dP_gg_dx(val_o, b_g_z, r_g, f, df_dx, muv, kv, sigma_gh/h, pmmv, dp_mm_dx, zvalv, H0, dmu_real_dx, 
         dk_real_dx, 1.0, 1.0, 0.0, 0.0)
-        m2 = cosmo.dP_gu_dx(o, b_g_z, r_g, f, df_dx, muv, kv, sigma_gh/h, sigma_uh/h, pmmv, dp_mm_dx, H0, zvalv, Om, 
+        m2 = cosmo.dP_gu_dx(val_o, b_g_z, r_g, f, df_dx, muv, kv, sigma_gh/h, sigma_uh/h, pmmv, dp_mm_dx, H0, zvalv, Om, 
         1.0-Om, dk_real_dx, dmu_real_dx, 1.0, 1.0, 0.0, 0.0)
         m3 = m2
         m4 = 0
 
 
-    elif val_o == 9: # sigmau (calculate analytically) 
-
-        o = 8
+    elif val_o == cosmo_variable.sigma_u: # sigmau (calculate analytically)
 
         df_dx = 0
         dp_mm_dx = 0
@@ -1000,31 +1009,29 @@ def get_dCdx_matrix_elements(val_o: int, list_vals: list):
         dk_real_dx = 0
 
         m1 = 0
-        m2 = cosmo.dP_gu_dx(o, b_g_z, r_g, f, df_dx, muv, kv, sigma_gh/h, sigma_uh/h, pmmv, 
+        m2 = cosmo.dP_gu_dx(val_o, b_g_z, r_g, f, df_dx, muv, kv, sigma_gh/h, sigma_uh/h, pmmv, 
         dp_mm_dx, H0, zvalv, Om, 1.0-Om, dk_real_dx, dmu_real_dx, 1.0, 1.0, 0.0, 0.0)
         m3 = m2
-        m4 = cosmo.dP_uu_dx(o, muv, kv, f, df_dx, sigma_uh/h, pmmv, dp_mm_dx, H0, 
+        m4 = cosmo.dP_uu_dx(val_o, muv, kv, f, df_dx, sigma_uh/h, pmmv, dp_mm_dx, H0, 
         zvalv, Om, 1.0-Om, dk_real_dx, dmu_real_dx, 1.0, 1.0, 0.0, 0.0)
 
 
-    elif val_o == 10: # sigmag (calculate analytically) 
-
-        o = 5
+    elif val_o == cosmo_variable.sigma_g: # sigmag (calculate analytically)
 
         df_dx = 0
         dp_mm_dx = 0
         dmu_real_dx = 0
         dk_real_dx = 0
 
-        m1 = cosmo.dP_gg_dx(o, b_g_z, r_g, f, df_dx, muv, kv, sigma_gh/h, pmmv, dp_mm_dx, zvalv, 
+        m1 = cosmo.dP_gg_dx(val_o, b_g_z, r_g, f, df_dx, muv, kv, sigma_gh/h, pmmv, dp_mm_dx, zvalv, 
         H0, dmu_real_dx, dk_real_dx, 1.0, 1.0, 0.0, 0.0)
-        m2 = cosmo.dP_gu_dx(o, b_g_z, r_g, f, df_dx, muv, kv, sigma_gh/h, sigma_uh/h, pmmv, 
+        m2 = cosmo.dP_gu_dx(val_o, b_g_z, r_g, f, df_dx, muv, kv, sigma_gh/h, sigma_uh/h, pmmv, 
         dp_mm_dx, H0, zvalv, Om, 1.0-Om, dk_real_dx, dmu_real_dx, 1.0, 1.0, 0.0, 0.0)
         m3 = m2
         m4 = 0
 
 
-    elif val_o == 13: # varying N_eff
+    elif val_o == cosmo_variable.N_eff: # varying N_eff
 
         m1 = dPdNeff_arr_gg[:, kindex, zindex]
         m2 = dPdNeff_arr_gu[:, kindex, zindex]
@@ -1032,7 +1039,7 @@ def get_dCdx_matrix_elements(val_o: int, list_vals: list):
         m4 = dPdNeff_arr_uu[:, kindex, zindex]
         
 
-    elif val_o == 14: # varying n_s
+    elif val_o == cosmo_variable.n_s: # varying n_s
 
         m1 = dPdns_arr_gg[:, kindex, zindex]
         m2 = dPdns_arr_gu[:, kindex, zindex]
@@ -1179,9 +1186,11 @@ if __name__ == "__main__":
     
     # read in the power spectra, growth rate array, derivatives of power spectra w.r.t. different parameters of interest 
     read_power()
+    
+    Dataln = [mapping_index_dict[Data[i]] for i in range(nparams)] # list of parameters to be varied numerically
     # get the Planck 2018 results covariance matrix for the base LCDM parameters 
-    if include_Planck_base_LCDM_2018 and (0 in Data or 1 in Data or 2 in Data or 3 in Data or 4 in Data or 13 in Data or 14 in Data):
-        get_Planck18_MCMC(Data)
+    if include_Planck_base_LCDM_2018 and (0 in Dataln or 1 in Dataln or 2 in Dataln or 3 in Dataln or 4 in Dataln or 13 in Dataln or 14 in Dataln):
+        get_Planck18_MCMC(Dataln)
 
     ks = kvals
     mus = np.linspace(0, 1.0, num_mus)
@@ -1198,17 +1207,17 @@ if __name__ == "__main__":
 
         for i in np.arange(nparams): 
 
-            if Data[i] == 7: # bg
+            if Data[i] == cosmo_variable.b_g: # bg
 
                 message = "ERROR: b_g is a free parameter, but there is no information in the density field (Fisher matrix will be singular)."
                 logger.error(message)
 
-            elif Data[i] == 8: # rg
+            elif Data[i] == cosmo_variable.r_g: # rg
 
                 message = "ERROR: r_g is a free parameter, but there is no information in the density field (Fisher matrix will be singular)."
                 logger.error(message)
 
-            elif Data[i] == 10: # sigmag
+            elif Data[i] == cosmo_variable.sigma_g: # sigmag
 
                 message = "ERROR: sigma_g is a free parameter, but there is no information in the density field (Fisher matrix will be singular)."
                 logger.error(message)
@@ -1221,7 +1230,7 @@ if __name__ == "__main__":
 
         for i in np.arange(nparams): 
 
-            if Data[i] == 9: # sigma_u
+            if Data[i] == cosmo_variable.sigma_u: # sigma_u
                 message = "ERROR: sigma_u is a free parameter, but there is no information in the velocity field (Fisher matrix will be singular)."
                 logger.error(message)
      # --------------------------------------------------------------------------------------------------------
@@ -1240,7 +1249,7 @@ if __name__ == "__main__":
     
     # iterating through redshift bins 
     for ziter in range(num_redshift_bins): 
-        flags = Data 
+        flags = Dataln 
         # for each redshift bin we will calculate: 
         # 1) the effective redshift
         # 2) the Fisher matrix at this effective redshift 
@@ -1342,14 +1351,14 @@ if __name__ == "__main__":
         if (verbosity > 0):
             console.log("Fisher Matrix for this redshift bin:", style='yellow')
             console.log("==================")
-            if include_Planck_base_LCDM_2018 and (0 in Data or 1 in Data or 2 in Data or 3 in Data or 4 in Data or 13 in Data or 14 in Data):
+            if include_Planck_base_LCDM_2018 and (0 in Dataln or 1 in Dataln or 2 in Dataln or 3 in Dataln or 4 in Dataln or 13 in Dataln or 14 in Dataln):
                 console.log('(Including Planck 2018 information: ' + data_from_MCMC_chains + ')', style='yellow')
                 console.log(np.matrix(Fisher_matrix) + planck_18_information, style='yellow') 
             else:
                 print(Fisher_matrix, style='yellow')
         
         # now invert the Fisher matrix
-        if include_Planck_base_LCDM_2018 and (0 in Data or 1 in Data or 2 in Data or 3 in Data or 4 in Data or 13 in Data or 14 in Data):
+        if include_Planck_base_LCDM_2018 and (0 in Dataln or 1 in Dataln or 2 in Dataln or 3 in Dataln or 4 in Dataln or 13 in Dataln or 14 in Dataln):
             Fisher_matrix = np.matrix(Fisher_matrix) + planck_18_information
         else:
             Fisher_matrix = np.matrix(Fisher_matrix)
@@ -1361,7 +1370,7 @@ if __name__ == "__main__":
             console.log('This may be because sigma_u is a free parameter but you have no velocity field information in this bin.', style='bold red')
             console.log('Removing rows and columns corresponding to parameter we have no information for and reinverting matrix:', style='bold red')
 
-            Fisher_matrix, flags = shrink_sqr_matrix(Fisher_matrix, Data)
+            Fisher_matrix, flags = shrink_sqr_matrix(Fisher_matrix, Dataln)
             
             inverted_Fisher_matrix = np.linalg.inv(Fisher_matrix)
 
@@ -1576,7 +1585,7 @@ if __name__ == "__main__":
         if (verbosity > 0):
             console.log("Fisher Matrix for all redshift bins:", style='yellow')
             console.log("======================", style='yellow')
-            if include_Planck_base_LCDM_2018 and (0 in Data or 1 in Data or 2 in Data or 3 in Data or 4 in Data or 13 in Data or 14 in Data):
+            if include_Planck_base_LCDM_2018 and (0 in Dataln or 1 in Dataln or 2 in Dataln or 3 in Dataln or 4 in Dataln or 13 in Dataln or 14 in Dataln):
                 console.log('Including Planck 2018 results:', style='yellow')
                 console.log(Fisher_matrix_total + planck_18_information, style='yellow')
             else:
@@ -1587,7 +1596,7 @@ if __name__ == "__main__":
             fisher_matrices['sum of fisher information + any planck/extra info'] = Fisher_matrix_total + planck_18_information
 
         # Now invert the Fisher matrix
-        if include_Planck_base_LCDM_2018 and (0 in Data or 1 in Data or 2 in Data or 3 in Data or 4 in Data or 13 in Data or 14 in Data):
+        if include_Planck_base_LCDM_2018 and (0 in Dataln or 1 in Dataln or 2 in Dataln or 3 in Dataln or 4 in Dataln or 13 in Dataln or 14 in Dataln):
             inverted_Fisher_matrix_total = np.linalg.inv(Fisher_matrix_total + planck_18_information)
         else:
             inverted_Fisher_matrix_total = np.linalg.inv(Fisher_matrix_total)
@@ -1612,56 +1621,55 @@ if __name__ == "__main__":
                 # H0, As, Obh, Och, mnu, bg, rg, sigmau, sigmag, N_eff
                 # 0 , 1,  2,   3,    4,  7,  8,    9,      10,     13
 
-                if (Data[i] == 0):
+                if (Dataln[i] == 0):
                     console.log("H0 = %.6f pm %.6f" % (H0, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
                     console.log(" %.4f percent error on H0" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/H0)  )
 
 
-                elif (Data[i] == 1):
+                elif (Dataln[i] == 1):
                     console.log("As = %.6f * 1e-9 pm %.6f *1e-9" % (As*1e9, np.sqrt(inverted_Fisher_matrix_total[i,i])*1e9) )
                     console.log(" %.4f percent error on As" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/As)  )
 
 
-                elif (Data[i] == 2):
+                elif (Dataln[i] == 2):
                     console.log("Obh = %.6f pm %.6f" % (Obh, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
                     console.log(" %.4f percent error on Obh" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/Obh)  )
 
 
-                elif (Data[i] == 3):
+                elif (Dataln[i] == 3):
                     console.log("Och = %.6f pm %.6f" % (Och, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
                     console.log(" %.4f percent error on Och" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/Och)  )
 
 
-                elif (Data[i] == 4):
+                elif (Dataln[i] == 4):
                     console.log("m_nu = %.6f pm %.6f" % (m_nu, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
                     console.log(" %.4f percent error on m_nu" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/m_nu)  )
 
 
-                elif (Data[i] == 7):
+                elif (Dataln[i] == 7):
                     console.log("b_g = %.6f pm %.6f" % (b_g_zeff, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
                     console.log(" %.4f percent error on b_g" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/b_g_zeff)  )
 
                 
-                elif (Data[i] == 8):
+                elif (Dataln[i] == 8):
                     console.log("r_g = %.6f pm %.6f" % (r_g, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
                     console.log(" %.4f percent error on r_g" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/r_g)  )
 
 
-                elif (Data[i] == 9):
+                elif (Dataln[i] == 9):
                     console.log("sigma_u = %.6f pm %.6f" % (sigma_uh/h, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
                     console.log(" %.4f percent error on sigma_u" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/(sigma_uh/h))    )
 
-                elif (Data[i] == 10):
+                elif (Dataln[i] == 10):
                     console.log("sigma_g = %.6f pm %.6f" % (sigma_gh/h, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
                     console.log(" %.4f percent error on sigma_g" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/(sigma_gh/h))  )
 
-                
-                elif (Data[i] == 13):
+                elif (Dataln[i] == 13):
                     console.log("Neff = %.6f pm %.6f" % (3.046, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
                     console.log(" %.4f percent error on Neff" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/(3.046))  )
 
 
-                elif (Data[i] == 14):
+                elif (Dataln[i] == 14):
                     console.log("n_s = %.6f pm %.6f" % (ns, np.sqrt(inverted_Fisher_matrix_total[i,i])) )
                     console.log(" %.4f percent error on n_s" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/(ns))  )
 
@@ -1677,76 +1685,76 @@ if __name__ == "__main__":
 
             for i in range(nparams):
 
-                if (Data[i] == 0):
+                if (Dataln[i] == 0):
                     string_data = string_data + "H0 = %.6f pm %.6f" % (H0, np.sqrt(inverted_Fisher_matrix_total[i,i])) 
                     string_data = string_data + '\n'
                     string_data = string_data + " %.4f percent error on H0" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/H0) 
                     string_data = string_data + '\n'
 
-                elif (Data[i] == 1):
+                elif (Dataln[i] == 1):
                     string_data = string_data + "As = %.6f * 1e-9 pm %.6f * 1e-9" % (As*1e9, np.sqrt(inverted_Fisher_matrix_total[i,i])*1e9) 
                     string_data = string_data + '\n'
                     string_data = string_data + " %.4f percent error on As" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/As)  
                     string_data = string_data + '\n'
 
 
-                elif (Data[i] == 2):
+                elif (Dataln[i] == 2):
                     string_data = string_data + "Obh = %.6f pm %.6f" % (Obh, np.sqrt(inverted_Fisher_matrix_total[i,i])) 
                     string_data = string_data + '\n'
                     string_data = string_data + " %.4f percent error on Obh" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/Obh)  
                     string_data = string_data + '\n'
 
                     
-                elif (Data[i] == 3):
+                elif (Dataln[i] == 3):
                     string_data = string_data + "Och = %.6f pm %.6f" % (Och, np.sqrt(inverted_Fisher_matrix_total[i,i])) 
                     string_data = string_data + '\n'
                     string_data = string_data + " %.4f percent error on Och" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/Och)  
                     string_data = string_data + '\n'
 
                     
-                elif (Data[i] == 4):
+                elif (Dataln[i] == 4):
                     string_data = string_data + "m_nu = %.6f pm %.6f" % (m_nu, np.sqrt(inverted_Fisher_matrix_total[i,i])) 
                     string_data = string_data + '\n'
                     string_data = string_data + " %.4f percent error on m_nu" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/m_nu)  
                     string_data = string_data + '\n'
 
 
-                elif (Data[i] == 7):
+                elif (Dataln[i] == 7): 
                     string_data = string_data + "b_g = %.6f pm %.6f" % (b_g_zeff, np.sqrt(inverted_Fisher_matrix_total[i,i])) 
                     string_data = string_data + '\n'
                     string_data = string_data + " %.4f percent error on b_g" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/b_g_zeff)  
                     string_data = string_data + '\n'
 
                 
-                elif (Data[i] == 8):
+                elif (Dataln[i] == 8):
                     string_data = string_data + "r_g = %.6f pm %.6f" % (r_g, np.sqrt(inverted_Fisher_matrix_total[i,i])) 
                     string_data = string_data + '\n'
                     string_data = string_data + " %.4f percent error on r_g" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/r_g)  
                     string_data = string_data + '\n'
 
 
-                elif (Data[i] == 9):
+                elif (Dataln[i] == 9):
                     string_data = string_data + "sigma_u = %.6f pm %.6f" % (sigma_uh/h, np.sqrt(inverted_Fisher_matrix_total[i,i])) 
                     string_data = string_data + '\n'
                     string_data = string_data + " %.4f percent error on sigma_u" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/(sigma_uh/h))    
                     string_data = string_data + '\n'
 
                 
-                elif (Data[i] == 10):
+                elif (Dataln[i] == 10):
                     string_data = string_data + "sigma_g = %.6f pm %.6f" % (sigma_gh/h, np.sqrt(inverted_Fisher_matrix_total[i,i])) 
                     string_data = string_data + '\n'
                     string_data = string_data + " %.4f percent error on sigma_g" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/(sigma_gh/h))  
                     string_data = string_data + '\n'
 
 
-                elif (Data[i] == 13):
+                elif (Dataln[i] == 13):
                     string_data = string_data + "Neff = %.6f pm %.6f" % (3.046, np.sqrt(inverted_Fisher_matrix_total[i,i])) 
                     string_data = string_data + '\n'
                     string_data = string_data +" %.4f percent error on Neff" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/(3.046))  
                     string_data = string_data + '\n'
 
 
-                elif (Data[i] == 14):
+                elif (Dataln[i] == 14):
                     string_data = string_data + "ns = %.6f pm %.6f" % (ns, np.sqrt(inverted_Fisher_matrix_total[i,i])) 
                     string_data = string_data + '\n'
                     string_data = string_data +" %.4f percent error on ns" % (100*np.sqrt(inverted_Fisher_matrix_total[i, i])/(ns))  
@@ -1763,7 +1771,7 @@ if __name__ == "__main__":
         inverted_Fisher_matrix_total = inverted_Fisher_matrix
 
 
-    if plot_ellipses and 4 in Data:
+    if plot_ellipses and 4 in Dataln:
     
         
         vals = {'0': [H0, 'H_0', r'$H_0$'],                   '7': [b_g_zeff, 'bg', r'$b_g$'],
@@ -1777,17 +1785,17 @@ if __name__ == "__main__":
 
         for i in np.arange(len(Data)):
 
-            if Data[i] != 4:
+            if Dataln[i] != 4:
 
-                mnu_index = Data.index(4)
-                data_flag = Data[i]
+                mnu_index = Dataln.index(4)
+                data_flag = Dataln[i]
                 
 
                 sigma_otherval_sqrd = 0
                 cross_correlation_sqrd = 0 
                 cross_correlation = 0
-
-                if Data[i] == 1:
+    
+                if Dataln[i] == 1:
                     sigma_otherval_sqrd = inverted_Fisher_matrix_total[i,i]*1e18
                     cross_correlation_sqrd = (inverted_Fisher_matrix_total[mnu_index, i]*1e9)**2
                     cross_correlation = inverted_Fisher_matrix_total[mnu_index, i]*1e9
