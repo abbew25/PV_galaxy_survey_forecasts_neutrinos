@@ -171,8 +171,8 @@ def distortion_perpendicular(As_t: float, Obh2_t: float, Och2_t: float,
     D_A_z_fid = angular_diameter_distance(Om_fid, H0_fid, z)
     
     q_perp = 0
-    if z == 0: # this is true, you can check using L'Hopital 's rule in lim z -> zero
-        q_perp = 1.0
+    if z == 0: 
+        q_perp = H0_fid / H0_t
     else:
         q_perp = (D_A_z_t)/(D_A_z_fid)
 
@@ -206,17 +206,17 @@ def get_mus_realobs(mus: float, As_t: float,  # get the actual observations of m
     return mus_obs
 
 
-# function to get mu_observed (observed values of mu) from mu_actual 
-def get_mus_obsreal(mus_obs: float, As_t: float,  # get the actual mu given some some set of mus to be the observations
-    Obh2_t: float, Och2_t: float, H0_t: float, 
-    Mnu_t: float, As_fid: float, Obh2_fid: float, 
-    Och2_fid: float, H0_fid: float, Mnu_fid: float, z: float):
-    '''
-    Returns mu (real) computed from parameters for real and fidicual cosmologies and mu (observed). 
-    '''
-    F = distortion_ratio_F(As_t, Obh2_t, Och2_t, H0_t, Mnu_t, As_fid, Obh2_fid, Och2_fid, H0_fid, Mnu_fid, z)
-    mu_real = mus_obs * F * (np.sqrt(1.0 + (mus_obs**2)*(F**2 - 1.0))) 
-    return mu_real 
+# # function to get mu_observed (observed values of mu) from mu_actual 
+# def get_mus_obsreal(mus_obs: float, As_t: float,  # get the actual mu given some some set of mus to be the observations
+#     Obh2_t: float, Och2_t: float, H0_t: float, 
+#     Mnu_t: float, As_fid: float, Obh2_fid: float, 
+#     Och2_fid: float, H0_fid: float, Mnu_fid: float, z: float):
+#     '''
+#     Returns mu (real) computed from parameters for real and fidicual cosmologies and mu (observed). 
+#     '''
+#     F = distortion_ratio_F(As_t, Obh2_t, Och2_t, H0_t, Mnu_t, As_fid, Obh2_fid, Och2_fid, H0_fid, Mnu_fid, z)
+#     mu_real = mus_obs * F * (np.sqrt(1.0 + (mus_obs**2)*(F**2 - 1.0))) 
+#     return mu_real 
 
 # function to get k_real (real k modes) from k_fiducial (values of mk modes observer believes they are measuring based on fiducial cosmology)
 def get_ks_realobs(ks: float, As_t: float, Obh2_t: float, 
@@ -234,18 +234,18 @@ def get_ks_realobs(ks: float, As_t: float, Obh2_t: float,
     return ks_obs
 
 
-# function to get k_observed (observed k modes) from k_actual 
-def get_ks_obsreal(ks_obs: float, As_t: float, Obh2_t: float,
-    Och2_t: float, H0_t: float, Mnu_t: float, 
-    As_fid: float, Obh2_fid: float, Och2_fid: float, 
-    H0_fid: float, Mnu_fid: float, z: float, mus: float):
-    '''
-    Returns k (real) computed from parameters for real and fiducial cosmologies and k (observed).
-    '''
-    F = distortion_ratio_F(As_t, Obh2_t, Och2_t, H0_t, Mnu_t, As_fid, Obh2_fid, Och2_fid, H0_fid, Mnu_fid, z)
-    q_perp = distortion_perpendicular(As_t, Obh2_t, Och2_t, H0_t, Mnu_t, As_fid, Obh2_fid, Och2_fid, H0_fid, Mnu_fid, z)
-    ks_real = ks_obs * q_perp / (np.sqrt(1.0 + (mus**2)*(F**2 - 1.0)))
-    return ks_real
+# # function to get k_observed (observed k modes) from k_actual 
+# def get_ks_obsreal(ks_obs: float, As_t: float, Obh2_t: float,
+#     Och2_t: float, H0_t: float, Mnu_t: float, 
+#     As_fid: float, Obh2_fid: float, Och2_fid: float, 
+#     H0_fid: float, Mnu_fid: float, z: float, mus: float):
+#     '''
+#     Returns k (real) computed from parameters for real and fiducial cosmologies and k (observed).
+#     '''
+#     F = distortion_ratio_F(As_t, Obh2_t, Och2_t, H0_t, Mnu_t, As_fid, Obh2_fid, Och2_fid, H0_fid, Mnu_fid, z)
+#     q_perp = distortion_perpendicular(As_t, Obh2_t, Och2_t, H0_t, Mnu_t, As_fid, Obh2_fid, Och2_fid, H0_fid, Mnu_fid, z)
+#     ks_real = ks_obs * q_perp / (np.sqrt(1.0 + (mus**2)*(F**2 - 1.0)))
+#     return ks_real
 
 
 # function to just get the power spectrum of matter (linear) from CLASS----------------------------
@@ -564,44 +564,18 @@ def dk_obs_dx(param: cosmo_variable, dF_dx: float, dq_perp_dx: float, mu: float,
 
 
 # function to compute the derivative of the distortion ratio F with respect to cosmological parameters
-def dF_distortion_dx(param: cosmo_variable, F: float, H0_t: float, z: float, Om_t: float):
+def dF_distortion_dx(param: cosmo_variable, F: float, H0_t: float, z: float, Om_t: float, H0_fid: float, Om_fid: float, q_perp: float, q_para: float):
     '''
-    Function to compute the derivative of F = q_perp/q_parallel with respect
+    Function to compute the derivative of F = q_parallel/q_perp with respect
     to H0, Obh2, Och2 or Mnu (all other derivatives = 0).
     '''
-    H_z_t = get_Hubble_z(z, Om_t, H0_t)
-    E_z = H_z_t/H0_t
-    h_t = H0_t/100.0
-    D_a_z = angular_diameter_distance(Om_t, H0_t, z)
-    c = 299792.458 # speed of light in km/s 
     
-    if z == 0:
-        return 0.0
+    dq_para_dx = dq_para_distortion_dx(param, H0_t, H0_fid, Om_t, Om_fid, z) 
+    dq_perp_dx = dq_perp_distortion_dx(param, H0_t, H0_fid, Om_t, Om_fid, z) 
     
-    else: 
+    dF_dx = 1.0/q_perp * dq_para_dx - (q_para/(q_perp**2))*dq_perp_dx
     
-        if param == cosmo_variable.H0: # H0
-        
-            return 0.0 
-
-        elif param == cosmo_variable.mnu or param == cosmo_variable.Obh2 or param == cosmo_variable.Och2: # Mnu, Obh, Och
-            
-            functoint = lambda zi: H0_t * ((1.0 + zi)**3 - 1.0) * (1.0 / h_t**2) * -0.5 / E_z**3 
-            dinvEz_dx = ( 1.0*(1.0 + z)**3 -1.0 ) * (1.0 / h_t**2) * -0.5 / E_z**3 
-            if param == 2:
-                dinvEz_dx = ( 1.0*(1.0 + z)**3 -1.0 ) * (1.0 / (93.14 * h_t**2)) * -0.5 / E_z**3 
-                functoint = lambda zi: H0_t * ((1.0 + zi)**3 - 1.0) * (1.0 / (93.14 * h_t**2)) * -0.5 / E_z**3 
-            
-            integral = quad(functoint, 0.0, z)[0] 
-            integral = integral * (c / H0_t) * 1.0/(1.0 + z) 
-            res = F / D_a_z * integral - F * E_z * dinvEz_dx 
-            
-            return res
-
-        else:
-            msg = 'param value (o) is probably not correct/ derivatie is zero. (dF_distortion_dx()).'
-            logger.error(msg)
-            raise (ValueError)
+    return dF_dx
         
 
 # function to compute the derivative of real mu with respect to cosmological parameters 
@@ -632,13 +606,21 @@ Om_fid: float, z: float, c: float = 299792.458):
     D_a_real = angular_diameter_distance(Om_t, H0_t, z)
     D_a_fid = angular_diameter_distance(Om_fid, H0_fid, z)
     h_t = H0_t/100.0
-    q_perp = D_a_real/D_a_fid if D_a_fid != 0 else 1.0 
+    q_perp = D_a_real/D_a_fid if z != 0 else H0_fid/H0_t 
     E_z = get_Hubble_z(z, Om_t, H0_t)/H0_t 
     
     if param == cosmo_variable.H0: # H0
+        
+        if z == 0:
+            return -1.0 * q_perp / H0_t 
+        
+        else: 
 
-        res = -1.0*q_perp/(H0_t)
-        return res 
+            funcEz = lambda zi: np.sqrt(Om_t * (1.0 + zi)**3 + (1.0 - Om_t)) 
+            functoint = lambda zi: (Om_t * (1.0 + zi)**3 - Om_t) * (1.0 / funcEz(zi)**3)
+            integral = quad(functoint, 0.0, z)[0]
+            res = -1.0 * q_perp / H0_t + (1.0/(D_a_fid)) * (c / (H0_t**2)) * (1.0/(1.0 + z)) * integral
+            return res 
         
     elif param == cosmo_variable.Obh2 or param == cosmo_variable.Och2 or param == cosmo_variable.mnu: # Mnu, Obh, Och
             
@@ -646,10 +628,11 @@ Om_fid: float, z: float, c: float = 299792.458):
             return 0.0
         
         else: 
-            functoint = lambda zi: H0_t * ((1.0 + zi)**3 - 1.0) * (1.0 / h_t**2) * -0.5 / E_z**3 
-            if param == 2:
-                functoint = lambda zi: H0_t * ((1.0 + zi)**3 - 1.0) * (1.0 / (93.14 * h_t**2)) * -0.5 / E_z**3 
-            
+            funcEz = lambda zi: np.sqrt(Om_t * (1.0 + zi)**3 + (1.0 - Om_t)) 
+            functoint = lambda zi: ((1.0 + zi)**3 - 1.0) * (1.0 / h_t**2) * -0.5 / funcEz(zi)**3 
+            if param == cosmo_variable.mnu:
+                functoint = lambda zi: ((1.0 + zi)**3 - 1.0) * (1.0 / (93.14 * h_t**2)) * -0.5 / funcEz(zi)**3 
+
             integral = quad(functoint, 0.0, z)[0] 
             integral = integral * (c / H0_t) * 1.0/(1.0 + z) 
             
@@ -678,9 +661,15 @@ def dq_para_distortion_dx(param: cosmo_variable, H0_t: float, H0_fid: float, Om_
     
 
     if param == cosmo_variable.H0: #H0
-
-        res = -1.0 * q_para / H0_t 
-        return res
+        
+        if z == 0:
+            return -1.0 * q_para / H0_t
+        
+        else: 
+            
+            omegamfunc = Om_t * (1.0 + z)**3 - Om_t 
+            res = -1.0 * q_para / H0_t * (1.0 - 1.0/E_z**2 * omegamfunc) 
+            return res
 
     elif param == cosmo_variable.Obh2 or param == cosmo_variable.Och2 or param == cosmo_variable.mnu: # Mnu, Obh or Och
 
@@ -688,11 +677,11 @@ def dq_para_distortion_dx(param: cosmo_variable, H0_t: float, H0_fid: float, Om_
             return 0.0
         
         else: 
-            dE2_dx = (1.0*(1.0 + z)**3 - 1.0) * (1.0/(h**2))
-            if param == 2:
-                dE2_dx = (1.0*(1.0 + z)**3 - 1.0) * (1.0/(93.14*h**2))
+            dE_dx = (1.0*(1.0 + z)**3 - 1.0) * (1.0/(h**2)) * 1.0/E_z  * 0.5 
+            if param == cosmo_variable.mnu:
+                dE_dx = (1.0*(1.0 + z)**3 - 1.0) * (1.0/(93.14*h**2)) * 1.0/E_z * 0.5 
                 
-            res = -0.5 * q_para * dE2_dx / (E_z**2) 
+            res = - q_para / H_z_t * dE_dx * H0_t
             return res
 
     else:
@@ -703,7 +692,7 @@ def dq_para_distortion_dx(param: cosmo_variable, H0_t: float, H0_fid: float, Om_
 # get derivatives of galaxy galaxy power spectrum w.r.t. relevant parameter (need to pass in P_mm and dP_dx)
 def dP_gg_dx(param: cosmo_variable, bg: float, rg: float, f_t: npt.NDArray, df_dx_t: npt.NDArray, mu_obs: float, k_obs: npt.NDArray, 
 sigmag: float, P_mm_t: npt.NDArray, dP_mm_dx_t: npt.NDArray, z: float, H0_t: float, dmu_obs_dx: float, dk_obs_dx: npt.NDArray, 
-q_para: float, q_perp: float, dq_para_dx: float, dq_perp_dx: float): 
+q_para: float, q_perp: float, dq_para_dx: float, dq_perp_dx: float, includeAP: bool = True): 
     ''' 
     Function to semi-analytically calculate dP_gg_dx where x is some parameter.
     Only dP/dx is returned.
@@ -735,24 +724,25 @@ q_para: float, q_perp: float, dq_para_dx: float, dq_perp_dx: float):
         res += (f_t**2)*(mu_obs**4)*P_mm_t*(((k_obs*mu_obs*sigmag)**2)/H0_t)*(Dg2**2)/(q_para*(q_perp**2)) 
         res += 2*f_t*(mu_obs**4)*(df_dx_t)*P_mm_t*Dg2/(q_para*(q_perp**2))
 
+        if includeAP: 
         #res += (all extra terms due to AP Effect need to be added here)
-        res += 4.0*dmu_obs_dx*(bg*rg*f_t*mu_obs)*Dg2*P_mm_t/(q_para*(q_perp**2))
-        res += 4.0*dmu_obs_dx*((mu_obs**3)*(f_t**2))*Dg2*P_mm_t/(q_para*(q_perp**2))
+            res += 4.0*dmu_obs_dx*(bg*rg*f_t*mu_obs)*Dg2*P_mm_t/(q_para*(q_perp**2))
+            res += 4.0*dmu_obs_dx*((mu_obs**3)*(f_t**2))*Dg2*P_mm_t/(q_para*(q_perp**2))
 
-        res += -1.0*(bg**2)*(sigmag**2)*(Dg2**2)*k_obs*(mu_obs**2)*dk_obs_dx*P_mm_t/(q_para*(q_perp**2))
-        res += -1.0*(bg**2)*(sigmag**2)*(Dg2**2)*mu_obs*(k_obs**2)*dmu_obs_dx*P_mm_t/(q_para*(q_perp**2))
+            res += -1.0*(bg**2)*(sigmag**2)*(Dg2**2)*k_obs*(mu_obs**2)*dk_obs_dx*P_mm_t/(q_para*(q_perp**2))
+            res += -1.0*(bg**2)*(sigmag**2)*(Dg2**2)*mu_obs*(k_obs**2)*dmu_obs_dx*P_mm_t/(q_para*(q_perp**2))
 
-        res += -1.0*( 2.0*rg*bg*f_t*(mu_obs**2) )*(sigmag**2)*(Dg2**2)*k_obs*(mu_obs**2)*dk_obs_dx*P_mm_t/(q_para*(q_perp**2))
-        res += -1.0*( 2.0*rg*bg*f_t*(mu_obs**2) )*(sigmag**2)*(Dg2**2)*mu_obs*(k_obs**2)*dmu_obs_dx*P_mm_t/(q_para*(q_perp**2))
+            res += -1.0*( 2.0*rg*bg*f_t*(mu_obs**2) )*(sigmag**2)*(Dg2**2)*k_obs*(mu_obs**2)*dk_obs_dx*P_mm_t/(q_para*(q_perp**2))
+            res += -1.0*( 2.0*rg*bg*f_t*(mu_obs**2) )*(sigmag**2)*(Dg2**2)*mu_obs*(k_obs**2)*dmu_obs_dx*P_mm_t/(q_para*(q_perp**2))
 
-        res += -1.0*( (f_t**2)*(mu_obs**4) )*(sigmag**2)*(Dg2**2)*k_obs*(mu_obs**2)*dk_obs_dx*P_mm_t/(q_para*(q_perp**2))
-        res += -1.0*( (f_t**2)*(mu_obs**4) )*(sigmag**2)*(Dg2**2)*mu_obs*(k_obs**2)*dmu_obs_dx*P_mm_t/(q_para*(q_perp**2))
+            res += -1.0*( (f_t**2)*(mu_obs**4) )*(sigmag**2)*(Dg2**2)*k_obs*(mu_obs**2)*dk_obs_dx*P_mm_t/(q_para*(q_perp**2))
+            res += -1.0*( (f_t**2)*(mu_obs**4) )*(sigmag**2)*(Dg2**2)*mu_obs*(k_obs**2)*dmu_obs_dx*P_mm_t/(q_para*(q_perp**2))
 
-        res += -1.0*(1.0/((q_perp*q_para)**2))*(dq_para_dx)*( bg**2 + 2.0*rg*bg*f_t*(mu_obs**2) + (f_t**2)*(mu_obs**4))*Dg2*P_mm_t
-        res += -1.0*(2.0/((q_para)*(q_perp**3)))*(dq_perp_dx)*( bg**2 + 2.0*rg*bg*f_t*(mu_obs**2) + (f_t**2)*(mu_obs**4))*Dg2*P_mm_t
+            res += -1.0*(1.0/((q_perp*q_para)**2))*(dq_para_dx)*( bg**2 + 2.0*rg*bg*f_t*(mu_obs**2) + (f_t**2)*(mu_obs**4))*Dg2*P_mm_t
+            res += -1.0*(2.0/((q_para)*(q_perp**3)))*(dq_perp_dx)*( bg**2 + 2.0*rg*bg*f_t*(mu_obs**2) + (f_t**2)*(mu_obs**4))*Dg2*P_mm_t
 
         return res
-
+    
     elif param == cosmo_variable.Obh2 or param == cosmo_variable.Och2 or param == cosmo_variable.mnu or param == cosmo_variable.As: # varying obh, och, mnu, As
         res = ( bg**2 )*dP_mm_dx_t*Dg2/(q_para*(q_perp**2))
         #res = 0
@@ -763,21 +753,21 @@ q_para: float, q_perp: float, dq_para_dx: float, dq_perp_dx: float):
         res += ( 2.0*f_t*(mu_obs**4)*(df_dx_t) )*P_mm_t*Dg2/(q_para*(q_perp**2))
 
         #res += (all extra terms due to AP Effect need to be added here)
+        if includeAP:
+            res += 4.0*dmu_obs_dx*(bg*rg*f_t*mu_obs)*Dg2*P_mm_t/(q_para*(q_perp**2))
+            res += 4.0*dmu_obs_dx*((mu_obs**3)*(f_t**2))*Dg2*P_mm_t/(q_para*(q_perp**2))
 
-        res += 4.0*dmu_obs_dx*(bg*rg*f_t*mu_obs)*Dg2*P_mm_t/(q_para*(q_perp**2))
-        res += 4.0*dmu_obs_dx*((mu_obs**3)*(f_t**2))*Dg2*P_mm_t/(q_para*(q_perp**2))
+            res += -1.0*(bg**2)*(sigmag**2)*(Dg2**2)*k_obs*(mu_obs**2)*dk_obs_dx*P_mm_t/(q_para*(q_perp**2))
+            res += -1.0*(bg**2)*(sigmag**2)*(Dg2**2)*mu_obs*(k_obs**2)*dmu_obs_dx*P_mm_t/(q_para*(q_perp**2))
 
-        res += -1.0*(bg**2)*(sigmag**2)*(Dg2**2)*k_obs*(mu_obs**2)*dk_obs_dx*P_mm_t/(q_para*(q_perp**2))
-        res += -1.0*(bg**2)*(sigmag**2)*(Dg2**2)*mu_obs*(k_obs**2)*dmu_obs_dx*P_mm_t/(q_para*(q_perp**2))
+            res += -1.0*( 2.0*rg*bg*f_t*(mu_obs**2) )*(sigmag**2)*(Dg2**2)*k_obs*(mu_obs**2)*dk_obs_dx*P_mm_t/(q_para*(q_perp**2))
+            res += -1.0*( 2.0*rg*bg*f_t*(mu_obs**2) )*(sigmag**2)*(Dg2**2)*mu_obs*(k_obs**2)*dmu_obs_dx*P_mm_t/(q_para*(q_perp**2))
 
-        res += -1.0*( 2.0*rg*bg*f_t*(mu_obs**2) )*(sigmag**2)*(Dg2**2)*k_obs*(mu_obs**2)*dk_obs_dx*P_mm_t/(q_para*(q_perp**2))
-        res += -1.0*( 2.0*rg*bg*f_t*(mu_obs**2) )*(sigmag**2)*(Dg2**2)*mu_obs*(k_obs**2)*dmu_obs_dx*P_mm_t/(q_para*(q_perp**2))
+            res += -1.0*( (f_t**2)*(mu_obs**4) )*(sigmag**2)*(Dg2**2)*k_obs*(mu_obs**2)*dk_obs_dx*P_mm_t/(q_para*(q_perp**2))
+            res += -1.0*( (f_t**2)*(mu_obs**4) )*(sigmag**2)*(Dg2**2)*mu_obs*(k_obs**2)*dmu_obs_dx*P_mm_t/(q_para*(q_perp**2))
 
-        res += -1.0*( (f_t**2)*(mu_obs**4) )*(sigmag**2)*(Dg2**2)*k_obs*(mu_obs**2)*dk_obs_dx*P_mm_t/(q_para*(q_perp**2))
-        res += -1.0*( (f_t**2)*(mu_obs**4) )*(sigmag**2)*(Dg2**2)*mu_obs*(k_obs**2)*dmu_obs_dx*P_mm_t/(q_para*(q_perp**2))
-
-        res += -1.0*(1.0/((q_perp*q_para)**2))*(dq_para_dx)*( bg**2 + 2.0*rg*bg*f_t*(mu_obs**2) + (f_t**2)*(mu_obs**4))*Dg2*P_mm_t
-        res += -1.0*(2.0/((q_para)*(q_perp**3)))*(dq_perp_dx)*( bg**2 + 2.0*rg*bg*f_t*(mu_obs**2) + (f_t**2)*(mu_obs**4))*Dg2*P_mm_t
+            res += -1.0*(1.0/((q_perp*q_para)**2))*(dq_para_dx)*( bg**2 + 2.0*rg*bg*f_t*(mu_obs**2) + (f_t**2)*(mu_obs**4))*Dg2*P_mm_t
+            res += -1.0*(2.0/((q_para)*(q_perp**3)))*(dq_perp_dx)*( bg**2 + 2.0*rg*bg*f_t*(mu_obs**2) + (f_t**2)*(mu_obs**4))*Dg2*P_mm_t
 
         return res
 
@@ -809,7 +799,7 @@ q_para: float, q_perp: float, dq_para_dx: float, dq_perp_dx: float):
 # get derivatives of galaxy velocity div. power spectrum w.r.t. relevant parameters (need to pass in P_theta-delta and dP_dx)
 def dP_gu_dx(param: cosmo_variable, bg: float, rg: float, f_t: npt.NDArray, df_dx_t: npt.NDArray, mu_obs: float, k_obs: npt.NDArray, 
 sigmag: float, sigmau: float, P_mm_t: npt.NDArray, dP_mm_dx_t: npt.NDArray, H0_t: float, z: float, omegam_t: float, omegalambda_t: float, 
-dk_obs_dx: npt.NDArray, dmu_obs_dx: float, q_para: float, q_perp: float, dq_para_dx: float, dq_perp_dx: float):
+dk_obs_dx: npt.NDArray, dmu_obs_dx: float, q_para: float, q_perp: float, dq_para_dx: float, dq_perp_dx: float, includeAP: bool = True):
     ''' 
     Function to semi-analytically calculate dP_gu_dx where x is some parameter.
     The user needs to pass in P_mm(k) (P_mtheta), dP_mm_dx(k) (dP_mtheta_dx), f(k), 
@@ -842,17 +832,19 @@ dk_obs_dx: npt.NDArray, dmu_obs_dx: float, q_para: float, q_perp: float, dq_para
         res += (a*H_z_t*mu_obs/k_obs)*( rg*bg*f_t + ((mu_obs*f_t)**2) )*(P_mm_t)*Dg*( np.sinc(sigmau*k_obs/np.pi) - np.cos(sigmau*k_obs) )*(1.0/(q_para*(q_perp**2)))/(H0_t)
         res += (a*H_z_t*mu_obs/k_obs)*( rg*bg*f_t + ((mu_obs*f_t)**2) )*(P_mm_t)*Du*((mu_obs*k_obs*sigmag)**2)*(Dg**3)*(1.0/(q_para*(q_perp**2)))/(2*H0_t)
         # res += extra terms for AP effect
-        res += -1.0*((a*H_z_t*mu_obs)/(k_obs**2))*dk_obs_dx*(f_t*rg*bg)*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
-        res += -1.0*((a*H_z_t*mu_obs)/(k_obs**2))*dk_obs_dx*((f_t**2)*(mu_obs**2))*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
-        res += ((a*H_z_t)/(k_obs))*dmu_obs_dx*(f_t*rg*bg)*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
-        res += ((a*H_z_t)/(k_obs))*dmu_obs_dx*(3.0*(f_t**2)*(mu_obs**2))*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
-        res += -1.0*((a*H_z_t*mu_obs)/(2*k_obs))*(f_t*rg*bg + (f_t**2)*(mu_obs**2))*Du*(Dg**3)*(sigmag**2)*((k_obs**2)*mu_obs*dmu_obs_dx)*P_mm_t*(1.0/(q_para*(q_perp**2)))
-        res += -1.0*((a*H_z_t*mu_obs)/(2*k_obs))*(f_t*rg*bg + (f_t**2)*(mu_obs**2))*Du*(Dg**3)*(sigmag**2)*((mu_obs**2)*k_obs*dk_obs_dx)*P_mm_t*(1.0/(q_para*(q_perp**2)))
-        res += ((a*H_z_t*mu_obs)/(k_obs))*(f_t*bg*rg)*Dg*dk_obs_dx*( np.cos(k_obs*sigmau)/k_obs - np.sin(k_obs*sigmau)/((k_obs**2)*sigmau) )*P_mm_t*(1.0/(q_para*(q_perp**2)))
-        res += ((a*H_z_t*mu_obs)/(k_obs))*((f_t**2)*(mu_obs**2))*Dg*dk_obs_dx*( np.cos(k_obs*sigmau)/(k_obs) - np.sin(k_obs*sigmau)/((k_obs**2)*sigmau) )*P_mm_t*(1.0/(q_para*(q_perp**2)))
+        
+        if includeAP: 
+            res += -1.0*((a*H_z_t*mu_obs)/(k_obs**2))*dk_obs_dx*(f_t*rg*bg)*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
+            res += -1.0*((a*H_z_t*mu_obs)/(k_obs**2))*dk_obs_dx*((f_t**2)*(mu_obs**2))*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
+            res += ((a*H_z_t)/(k_obs))*dmu_obs_dx*(f_t*rg*bg)*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
+            res += ((a*H_z_t)/(k_obs))*dmu_obs_dx*(3.0*(f_t**2)*(mu_obs**2))*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
+            res += -1.0*((a*H_z_t*mu_obs)/(2*k_obs))*(f_t*rg*bg + (f_t**2)*(mu_obs**2))*Du*(Dg**3)*(sigmag**2)*((k_obs**2)*mu_obs*dmu_obs_dx)*P_mm_t*(1.0/(q_para*(q_perp**2)))
+            res += -1.0*((a*H_z_t*mu_obs)/(2*k_obs))*(f_t*rg*bg + (f_t**2)*(mu_obs**2))*Du*(Dg**3)*(sigmag**2)*((mu_obs**2)*k_obs*dk_obs_dx)*P_mm_t*(1.0/(q_para*(q_perp**2)))
+            res += ((a*H_z_t*mu_obs)/(k_obs))*(f_t*bg*rg)*Dg*dk_obs_dx*( np.cos(k_obs*sigmau)/k_obs - np.sin(k_obs*sigmau)/((k_obs**2)*sigmau) )*P_mm_t*(1.0/(q_para*(q_perp**2)))
+            res += ((a*H_z_t*mu_obs)/(k_obs))*((f_t**2)*(mu_obs**2))*Dg*dk_obs_dx*( np.cos(k_obs*sigmau)/(k_obs) - np.sin(k_obs*sigmau)/((k_obs**2)*sigmau) )*P_mm_t*(1.0/(q_para*(q_perp**2)))
 
-        res += -1.0*(1.0/((q_para*q_perp)**2))*dq_para_dx*((a*H_z_t*mu_obs)/(k_obs))*( f_t*bg*rg + (f_t**2)*(mu_obs**2) )*Dg*Du*P_mm_t
-        res += -1.0*(2.0/((q_para)*(q_perp**3)))*dq_perp_dx*((a*H_z_t*mu_obs)/(k_obs))*( f_t*bg*rg + (f_t**2)*(mu_obs**2) )*Dg*Du*P_mm_t
+            res += -1.0*(1.0/((q_para*q_perp)**2))*dq_para_dx*((a*H_z_t*mu_obs)/(k_obs))*( f_t*bg*rg + (f_t**2)*(mu_obs**2) )*Dg*Du*P_mm_t
+            res += -1.0*(2.0/((q_para)*(q_perp**3)))*dq_perp_dx*((a*H_z_t*mu_obs)/(k_obs))*( f_t*bg*rg + (f_t**2)*(mu_obs**2) )*Dg*Du*P_mm_t
         return res  
 
     elif param == cosmo_variable.Obh2 or param == cosmo_variable.Och2 or param == cosmo_variable.mnu or param == cosmo_variable.As: # varying obh, och, mnu, As
@@ -864,35 +856,38 @@ dk_obs_dx: npt.NDArray, dmu_obs_dx: float, q_para: float, q_perp: float, dq_para
             u = np.sqrt( omegam_t*((1+z)**3) + omegalambda_t )
             dH_dx_t = (H0_t/(2*93.14*u*(h_t**2)))*( (1+z)**3 - 1 )
             res += (a*mu_obs/k_obs)*(rg*bg*f_t + ((mu_obs*f_t)**2))*Du*Dg*P_mm_t*(dH_dx_t)*(1.0/(q_para*(q_perp**2)))
-            # + extra terms for AP EFFECT!!!
-            res += -1.0*((a*H_z_t*mu_obs)/(k_obs**2))*dk_obs_dx*(f_t*rg*bg)*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
-            res += -1.0*((a*H_z_t*mu_obs)/(k_obs**2))*dk_obs_dx*((f_t**2)*(mu_obs**2))*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
-            res += ((a*H_z_t)/(k_obs))*dmu_obs_dx*(f_t*rg*bg)*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
-            res += ((a*H_z_t)/(k_obs))*dmu_obs_dx*(3.0*(f_t**2)*(mu_obs**2))*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
-            res += -1.0*((a*H_z_t*mu_obs)/(2*k_obs))*(f_t*rg*bg + (f_t**2)*(mu_obs**2))*Du*(Dg**3)*(sigmag**2)*((k_obs**2)*mu_obs*dmu_obs_dx)*P_mm_t*(1.0/(q_para*(q_perp**2)))
-            res += -1.0*((a*H_z_t*mu_obs)/(2*k_obs))*(f_t*rg*bg + (f_t**2)*(mu_obs**2))*Du*(Dg**3)*(sigmag**2)*((mu_obs**2)*k_obs*dk_obs_dx)*P_mm_t*(1.0/(q_para*(q_perp**2)))
-            res += ((a*H_z_t*mu_obs)/(k_obs))*(f_t*bg*rg)*Dg*dk_obs_dx*( np.cos(k_obs*sigmau)/k_obs - np.sin(k_obs*sigmau)/((k_obs**2)*sigmau) )*P_mm_t*(1.0/(q_para*(q_perp**2)))
-            res += ((a*H_z_t*mu_obs)/(k_obs))*((f_t**2)*(mu_obs**2))*Dg*dk_obs_dx*( np.cos(k_obs*sigmau)/k_obs - np.sin(k_obs*sigmau)/((k_obs**2)*sigmau) )*P_mm_t*(1.0/(q_para*(q_perp**2)))
-
-            res += -1.0*(1.0/((q_para*q_perp)**2))*dq_para_dx*((a*H_z_t*mu_obs)/(k_obs))*( f_t*bg*rg + (f_t**2)*(mu_obs**2) )*Dg*Du*P_mm_t
-            res += -1.0*(2.0/((q_para)*(q_perp**3)))*dq_perp_dx*((a*H_z_t*mu_obs)/(k_obs))*( f_t*bg*rg + (f_t**2)*(mu_obs**2) )*Dg*Du*P_mm_t
             
+            if includeAP:
+            # + extra terms for AP EFFECT!!!
+                res += -1.0*((a*H_z_t*mu_obs)/(k_obs**2))*dk_obs_dx*(f_t*rg*bg)*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
+                res += -1.0*((a*H_z_t*mu_obs)/(k_obs**2))*dk_obs_dx*((f_t**2)*(mu_obs**2))*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
+                res += ((a*H_z_t)/(k_obs))*dmu_obs_dx*(f_t*rg*bg)*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
+                res += ((a*H_z_t)/(k_obs))*dmu_obs_dx*(3.0*(f_t**2)*(mu_obs**2))*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
+                res += -1.0*((a*H_z_t*mu_obs)/(2*k_obs))*(f_t*rg*bg + (f_t**2)*(mu_obs**2))*Du*(Dg**3)*(sigmag**2)*((k_obs**2)*mu_obs*dmu_obs_dx)*P_mm_t*(1.0/(q_para*(q_perp**2)))
+                res += -1.0*((a*H_z_t*mu_obs)/(2*k_obs))*(f_t*rg*bg + (f_t**2)*(mu_obs**2))*Du*(Dg**3)*(sigmag**2)*((mu_obs**2)*k_obs*dk_obs_dx)*P_mm_t*(1.0/(q_para*(q_perp**2)))
+                res += ((a*H_z_t*mu_obs)/(k_obs))*(f_t*bg*rg)*Dg*dk_obs_dx*( np.cos(k_obs*sigmau)/k_obs - np.sin(k_obs*sigmau)/((k_obs**2)*sigmau) )*P_mm_t*(1.0/(q_para*(q_perp**2)))
+                res += ((a*H_z_t*mu_obs)/(k_obs))*((f_t**2)*(mu_obs**2))*Dg*dk_obs_dx*( np.cos(k_obs*sigmau)/k_obs - np.sin(k_obs*sigmau)/((k_obs**2)*sigmau) )*P_mm_t*(1.0/(q_para*(q_perp**2)))
+
+                res += -1.0*(1.0/((q_para*q_perp)**2))*dq_para_dx*((a*H_z_t*mu_obs)/(k_obs))*( f_t*bg*rg + (f_t**2)*(mu_obs**2) )*Dg*Du*P_mm_t
+                res += -1.0*(2.0/((q_para)*(q_perp**3)))*dq_perp_dx*((a*H_z_t*mu_obs)/(k_obs))*( f_t*bg*rg + (f_t**2)*(mu_obs**2) )*Dg*Du*P_mm_t
+                
         elif param == cosmo_variable.Obh2 or param == cosmo_variable.Och2: 
             u = np.sqrt( omegam_t*((1+z)**3) + omegalambda_t )
             dH_dx_t = (H0_t/(2*u*(h_t**2)))*( (1+z)**3 - 1 )
             res += (a*mu_obs/k_obs)*(rg*bg*f_t + ((mu_obs*f_t)**2))*Du*Dg*P_mm_t*(dH_dx_t)*(1.0/(q_para*(q_perp**2)))
             # + extra terms for AP EFFECT!!!
-            res += -1.0*((a*H_z_t*mu_obs)/(k_obs**2))*dk_obs_dx*(f_t*rg*bg)*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
-            res += -1.0*((a*H_z_t*mu_obs)/(k_obs**2))*dk_obs_dx*((f_t**2)*(mu_obs**2))*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
-            res += ((a*H_z_t)/(k_obs))*dmu_obs_dx*(f_t*rg*bg)*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
-            res += ((a*H_z_t)/(k_obs))*dmu_obs_dx*(3.0*(f_t**2)*(mu_obs**2))*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
-            res += -1.0*((a*H_z_t*mu_obs)/(2*k_obs))*(f_t*rg*bg + (f_t**2)*(mu_obs**2))*Du*(Dg**3)*(sigmag**2)*((k_obs**2)*mu_obs*dmu_obs_dx)*P_mm_t*(1.0/(q_para*(q_perp**2)))
-            res += -1.0*((a*H_z_t*mu_obs)/(2*k_obs))*(f_t*rg*bg + (f_t**2)*(mu_obs**2))*Du*(Dg**3)*(sigmag**2)*((mu_obs**2)*k_obs*dk_obs_dx)*P_mm_t*(1.0/(q_para*(q_perp**2)))
-            res += ((a*H_z_t*mu_obs)/(k_obs))*(f_t*bg*rg)*Dg*dk_obs_dx*( np.cos(k_obs*sigmau)/k_obs - np.sin(k_obs*sigmau)/((k_obs**2)*sigmau) )*P_mm_t*(1.0/(q_para*(q_perp**2)))
-            res += ((a*H_z_t*mu_obs)/(k_obs))*((f_t**2)*(mu_obs**2))*Dg*dk_obs_dx*( np.cos(k_obs*sigmau)/k_obs - np.sin(k_obs*sigmau)/((k_obs**2)*sigmau) )*P_mm_t*(1.0/(q_para*(q_perp**2)))
+            if includeAP:
+                res += -1.0*((a*H_z_t*mu_obs)/(k_obs**2))*dk_obs_dx*(f_t*rg*bg)*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
+                res += -1.0*((a*H_z_t*mu_obs)/(k_obs**2))*dk_obs_dx*((f_t**2)*(mu_obs**2))*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
+                res += ((a*H_z_t)/(k_obs))*dmu_obs_dx*(f_t*rg*bg)*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
+                res += ((a*H_z_t)/(k_obs))*dmu_obs_dx*(3.0*(f_t**2)*(mu_obs**2))*Dg*Du*P_mm_t*(1.0/(q_para*(q_perp**2)))
+                res += -1.0*((a*H_z_t*mu_obs)/(2*k_obs))*(f_t*rg*bg + (f_t**2)*(mu_obs**2))*Du*(Dg**3)*(sigmag**2)*((k_obs**2)*mu_obs*dmu_obs_dx)*P_mm_t*(1.0/(q_para*(q_perp**2)))
+                res += -1.0*((a*H_z_t*mu_obs)/(2*k_obs))*(f_t*rg*bg + (f_t**2)*(mu_obs**2))*Du*(Dg**3)*(sigmag**2)*((mu_obs**2)*k_obs*dk_obs_dx)*P_mm_t*(1.0/(q_para*(q_perp**2)))
+                res += ((a*H_z_t*mu_obs)/(k_obs))*(f_t*bg*rg)*Dg*dk_obs_dx*( np.cos(k_obs*sigmau)/k_obs - np.sin(k_obs*sigmau)/((k_obs**2)*sigmau) )*P_mm_t*(1.0/(q_para*(q_perp**2)))
+                res += ((a*H_z_t*mu_obs)/(k_obs))*((f_t**2)*(mu_obs**2))*Dg*dk_obs_dx*( np.cos(k_obs*sigmau)/k_obs - np.sin(k_obs*sigmau)/((k_obs**2)*sigmau) )*P_mm_t*(1.0/(q_para*(q_perp**2)))
 
-            res += -1.0*(1.0/((q_para*q_perp)**2))*dq_para_dx*((a*H_z_t*mu_obs)/(k_obs))*( f_t*bg*rg + (f_t**2)*(mu_obs**2) )*Dg*Du*P_mm_t
-            res += -1.0*(2.0/((q_para)*(q_perp**3)))*dq_perp_dx*((a*H_z_t*mu_obs)/(k_obs))*( f_t*bg*rg + (f_t**2)*(mu_obs**2) )*Dg*Du*P_mm_t
+                res += -1.0*(1.0/((q_para*q_perp)**2))*dq_para_dx*((a*H_z_t*mu_obs)/(k_obs))*( f_t*bg*rg + (f_t**2)*(mu_obs**2) )*Dg*Du*P_mm_t
+                res += -1.0*(2.0/((q_para)*(q_perp**3)))*dq_perp_dx*((a*H_z_t*mu_obs)/(k_obs))*( f_t*bg*rg + (f_t**2)*(mu_obs**2) )*Dg*Du*P_mm_t
 
         return res
 
@@ -927,7 +922,7 @@ dk_obs_dx: npt.NDArray, dmu_obs_dx: float, q_para: float, q_perp: float, dq_para
 # get derivatives of vel div. vel div. power spectrum w.r.t. relevant parameters (need to pass in P_thetatheta and dP_dx)
 def dP_uu_dx(param: cosmo_variable, mu_obs: float, k_obs: npt.NDArray, f_t: npt.NDArray, df_dx_t: npt.NDArray, sigmau: float, 
 P_mm_t: npt.NDArray, dP_mm_dx_t: npt.NDArray, H0_t: float, z: float, omegam_t: float, omegalambda_t: float, dk_obs_dx: npt.NDArray, dmu_obs_dx: float,
-q_para: float, q_perp: float, dq_para_dx: float, dq_perp_dx: float):
+q_para: float, q_perp: float, dq_para_dx: float, dq_perp_dx: float, includeAP: bool = True):
     ''' 
     Function to semi-analytically calculate dP_uu_dx where x is some parameter.
     The user needs to pass in P_mm(k) (P_theta theta), dP_mm_dx(k) (dP_theta theta_dx), 
@@ -954,12 +949,13 @@ q_para: float, q_perp: float, dq_para_dx: float, dq_perp_dx: float):
         res += ((a*mu_obs*H_z_t/k_obs)**2)*(f_t**2)*Du2*dP_mm_dx_t*(1.0/(q_para*(q_perp**2)))
         res += ((a*H_z_t*mu_obs/k_obs)**2)*P_mm_t*(f_t**2)*(2*np.sinc(k_obs*sigmau/np.pi))*((np.sinc(k_obs*sigmau/np.pi) - np.cos(sigmau*k_obs))/H0_t)*(1.0/(q_para*(q_perp**2)))
         # res += Extra terms for AP Effect
-        res += 2.0*mu_obs*dmu_obs_dx*(((a*H_z_t*f_t)/(k_obs))**2)*Du2*P_mm_t*(1.0/(q_para*(q_perp**2)))
-        res += -2.0*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*(dk_obs_dx/k_obs)*Du2*P_mm_t*(1.0/(q_para*(q_perp**2)))
-        res += 2.0*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*np.sqrt(Du2)*dk_obs_dx*P_mm_t*( np.cos(k_obs*sigmau)/(k_obs) - np.sin(k_obs*sigmau)/((k_obs**2)*sigmau) )*(1.0/(q_para*(q_perp**2)))
+        if includeAP: 
+            res += 2.0*mu_obs*dmu_obs_dx*(((a*H_z_t*f_t)/(k_obs))**2)*Du2*P_mm_t*(1.0/(q_para*(q_perp**2)))
+            res += -2.0*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*(dk_obs_dx/k_obs)*Du2*P_mm_t*(1.0/(q_para*(q_perp**2)))
+            res += 2.0*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*np.sqrt(Du2)*dk_obs_dx*P_mm_t*( np.cos(k_obs*sigmau)/(k_obs) - np.sin(k_obs*sigmau)/((k_obs**2)*sigmau) )*(1.0/(q_para*(q_perp**2)))
 
-        res += (-1.0/((q_perp*q_para)**2))*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*Du2*P_mm_t*dq_para_dx
-        res += (-2.0/(q_para*(q_perp**3)))*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*Du2*P_mm_t*dq_perp_dx
+            res += (-1.0/((q_perp*q_para)**2))*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*Du2*P_mm_t*dq_para_dx
+            res += (-2.0/(q_para*(q_perp**3)))*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*Du2*P_mm_t*dq_perp_dx
         return res
 
     elif param == cosmo_variable.Obh2 or param == cosmo_variable.Och2 or param == cosmo_variable.mnu or param == cosmo_variable.As: # varying obh, och, mnu, As
@@ -970,23 +966,25 @@ q_para: float, q_perp: float, dq_para_dx: float, dq_perp_dx: float):
             dH_dxsqrd = (H0_t/(2*93.14*u*(h_t**2)))*( (1+z)**3 - 1 )*(2*H_z_t)
             res += ((a*mu_obs/k_obs)**2)*((f_t)**2)*Du2*P_mm_t*(dH_dxsqrd)*(1.0/(q_para*(q_perp**2)))
             # res += EXTRA TERMS AP EFFECT
-            res += 2.0*mu_obs*dmu_obs_dx*(((a*H_z_t*f_t)/(k_obs))**2)*Du2*P_mm_t*(1.0/(q_para*(q_perp**2)))
-            res += -2.0*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*(dk_obs_dx/k_obs)*Du2*P_mm_t*(1.0/(q_para*(q_perp**2)))
-            res += 2.0*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*np.sqrt(Du2)*dk_obs_dx*P_mm_t*( np.cos(k_obs*sigmau)/(k_obs) - np.sin(k_obs*sigmau)/((k_obs**2)*sigmau) )*(1.0/(q_para*(q_perp**2)))
+            if includeAP:
+                res += 2.0*mu_obs*dmu_obs_dx*(((a*H_z_t*f_t)/(k_obs))**2)*Du2*P_mm_t*(1.0/(q_para*(q_perp**2)))
+                res += -2.0*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*(dk_obs_dx/k_obs)*Du2*P_mm_t*(1.0/(q_para*(q_perp**2)))
+                res += 2.0*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*np.sqrt(Du2)*dk_obs_dx*P_mm_t*( np.cos(k_obs*sigmau)/(k_obs) - np.sin(k_obs*sigmau)/((k_obs**2)*sigmau) )*(1.0/(q_para*(q_perp**2)))
 
-            res += (-1.0/((q_perp*q_para)**2))*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*Du2*P_mm_t*dq_para_dx
-            res += (-2.0/(q_para*(q_perp**3)))*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*Du2*P_mm_t*dq_perp_dx
+                res += (-1.0/((q_perp*q_para)**2))*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*Du2*P_mm_t*dq_para_dx
+                res += (-2.0/(q_para*(q_perp**3)))*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*Du2*P_mm_t*dq_perp_dx
 
         elif param == cosmo_variable.Obh2 or param == cosmo_variable.Och2:
             dH_dxsqrd =  (H0_t/(2*u*(h_t**2)))*( (1+z)**3 - 1 )*(2*H_z_t)
             res += ((a*mu_obs/k_obs)**2)*((f_t)**2)*Du2*P_mm_t*(dH_dxsqrd)*(1.0/(q_para*(q_perp**2)))
             # res += extra terms AP EFFECT
-            res += 2.0*mu_obs*dmu_obs_dx*(((a*H_z_t*f_t)/(k_obs))**2)*Du2*P_mm_t*(1.0/(q_para*(q_perp**2)))
-            res += -2.0*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*(dk_obs_dx/k_obs)*Du2*P_mm_t*(1.0/(q_para*(q_perp**2)))
-            res += 2.0*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*np.sqrt(Du2)*dk_obs_dx*P_mm_t*( np.cos(k_obs*sigmau)/(k_obs) - np.sin(k_obs*sigmau)/((k_obs**2)*sigmau) )*(1.0/(q_para*(q_perp**2)))
+            if includeAP:
+                res += 2.0*mu_obs*dmu_obs_dx*(((a*H_z_t*f_t)/(k_obs))**2)*Du2*P_mm_t*(1.0/(q_para*(q_perp**2)))
+                res += -2.0*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*(dk_obs_dx/k_obs)*Du2*P_mm_t*(1.0/(q_para*(q_perp**2)))
+                res += 2.0*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*np.sqrt(Du2)*dk_obs_dx*P_mm_t*( np.cos(k_obs*sigmau)/(k_obs) - np.sin(k_obs*sigmau)/((k_obs**2)*sigmau) )*(1.0/(q_para*(q_perp**2)))
 
-            res += (-1.0/((q_perp*q_para)**2))*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*Du2*P_mm_t*dq_para_dx
-            res += (-2.0/(q_para*(q_perp**3)))*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*Du2*P_mm_t*dq_perp_dx
+                res += (-1.0/((q_perp*q_para)**2))*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*Du2*P_mm_t*dq_para_dx
+                res += (-2.0/(q_para*(q_perp**3)))*(((a*H_z_t*f_t*mu_obs)/(k_obs))**2)*Du2*P_mm_t*dq_perp_dx
 
         return res
 
@@ -1325,6 +1323,7 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
         F = 1.0
         dF_dx = 0.0 
         q_perp = 1.0
+        q_para = 1.0
         q_parallel = 1.0
         dq_perp_dx = 0.0  
         dq_para_dx = 0.0
@@ -1333,22 +1332,22 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
         if o in [cosmo_variable.H0, cosmo_variable.As, cosmo_variable.Och2, 
                   cosmo_variable.Obh2, cosmo_variable.mnu, cosmo_variable.n_s, cosmo_variable.Neff]: # varying cosmological parameter x = non-zero df_dx
             # getting derivative of the growth rate w.r.t. parameter being varied
-            # if o in [cosmo_variable.H0, cosmo_variable.Och2, cosmo_variable.Obh2, cosmo_variable.mnu, cosmo_variable.As]:
-            #     df_dx = derivative_growth_rate(o, stepsize, Obh, Och, H0, As, mnu, neutrino_hier, 
-            #     z, kmin, kmax, num_k_points, da, linear, delta_mnu_max, 
-            #     mnu_central, kspaceoption, tau, ns, Obh_central, Och_central, H0_central, As_central, mnu_central,
-            #     mus, N_eff_deviation)
-            # elif o == cosmo_variable.Neff or o == cosmo_variable.n_s:
-            df_dx = derivative_growth_rate(o, stepsize, Obh, Och, H0, As, mnu, neutrino_hier, 
-            z, kmin, kmax, num_k_points, da, linear, delta_mnu_max, 
-            mnu_central, kspaceoption, tau, ns, Obh_central, Och_central, H0_central, As_central, mnu_central,
-            mus, N_eff_deviation)
+            if o in [cosmo_variable.H0, cosmo_variable.Och2, cosmo_variable.Obh2, cosmo_variable.mnu, cosmo_variable.As]:
+                df_dx = derivative_growth_rate(o, stepsize, Obh, Och, H0, As, mnu, neutrino_hier, 
+                z, kmin, kmax, num_k_points, da, linear, delta_mnu_max, 
+                mnu_central, kspaceoption, tau, ns, Obh_central, Och_central, H0_central, As_central, mnu_central,
+                mus, N_eff_deviation)
+            elif o == cosmo_variable.Neff or o == cosmo_variable.n_s:
+                df_dx[:,:] = derivative_growth_rate(o, stepsize, Obh, Och, H0, As, mnu, neutrino_hier, 
+                z, kmin, kmax, num_k_points, da, linear, delta_mnu_max, 
+                mnu_central, kspaceoption, tau, ns, Obh_central, Och_central, H0_central, As_central, mnu_central,
+                mus, N_eff_deviation)
             if o in [cosmo_variable.H0, cosmo_variable.Och2, cosmo_variable.Obh2, cosmo_variable.mnu]:
-                dF_dx = dF_distortion_dx(o, F, H0, z, omegam)
-                Om_f = get_Om_0(Obh_central, Och_central, mnu_central, H0_central) 
-                dq_perp_dx = dq_perp_distortion_dx(o, H0, H0_central, omegam, Om_f, z)
-                dq_para_dx = dq_para_distortion_dx(o, H0, H0_central, omegam, Om_f, z)
                 
+                Om_central = get_Om_0(Obh_central, Och_central, mnu_central, H0_central) 
+                dF_dx = dF_distortion_dx(o, F, H0, z, omegam, H0_central, Om_central, q_perp, q_para)
+                dq_perp_dx = dq_perp_distortion_dx(o, H0, H0_central, omegam, Om_central, z)
+                dq_para_dx = dq_para_distortion_dx(o, H0, H0_central, omegam, Om_central, z)
 
         else:
             df_dx = np.zeros((num_mus, num_k_points)) # growth rate only changes w.r.t. cosmological parameters
@@ -1376,17 +1375,17 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
                 
                 results_findiff_semi_analytic_derivatives[i, muu, :] = dP_gg_dx(o, bg, rg, growth_rates_arr[3, muu, :], df_dx[muu,:],
                 mus_obs_arr[3,muu], ks_obs_arr[3, muu, :], sigmag, matter_power_spectrum_arr[3,muu,:], matter_central_diffs[i, muu,:],
-                z, H0, dmuobs_dx, dkobs_dx, q_parallel, q_perp, dq_para_dx, dq_perp_dx)
+                z, H0, dmuobs_dx, dkobs_dx, q_parallel, q_perp, dq_para_dx, dq_perp_dx, includeAP=True)
             
             if P == RSPS_variable.P_ug:
                 results_findiff_semi_analytic_derivatives[i, muu, :] = dP_gu_dx(o, bg, rg, growth_rates_arr[3,muu,:], df_dx[muu,:], 
                 mus_obs_arr[3,muu], ks_obs_arr[3,muu,:], sigmag, sigmau, matter_power_spectrum_arr[3, muu, :], 
-                matter_central_diffs[i, muu, :], H0, z, omegam, 1.0-omegam, dkobs_dx, dmuobs_dx, q_parallel, q_perp, dq_para_dx, dq_perp_dx)
+                matter_central_diffs[i, muu, :], H0, z, omegam, 1.0-omegam, dkobs_dx, dmuobs_dx, q_parallel, q_perp, dq_para_dx, dq_perp_dx, includeAP=True)
                     
             if P == RSPS_variable.P_uu:
                 results_findiff_semi_analytic_derivatives[i, muu, :] = dP_uu_dx(o, mus_obs_arr[3, muu], ks_obs_arr[3, muu, :], 
                 growth_rates_arr[3,muu,:], df_dx[muu,:], sigmau, matter_power_spectrum_arr[3, muu, :], matter_central_diffs[i, muu, :],
-                H0, z, omegam, 1.0-omegam, dkobs_dx, dmuobs_dx, q_parallel, q_perp, dq_para_dx, dq_perp_dx)
+                H0, z, omegam, 1.0-omegam, dkobs_dx, dmuobs_dx, q_parallel, q_perp, dq_para_dx, dq_perp_dx, includeAP=True)
 
 
 
@@ -1579,6 +1578,12 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
         dP_dtheta0_mu1 = results_findiff_derivatives[0, mu_indices[0], :]
         dP_dtheta0_mu2 = results_findiff_derivatives[0, mu_indices[1], :]
 
+
+        # dP_dthetasemimu1 = results_findiff_semi_analytic_derivatives[0, mu_indices[0], :]
+        # dP_dthetasemimu2 = results_findiff_semi_analytic_derivatives[0, mu_indices[1], :] 
+        
+        # print(dP_dtheta0_mu1/dP_dthetasemimu1)
+        # print(dP_dtheta0_mu2/dP_dthetasemimu2)
 
 
         # loop through derivative results using 1st method (just finite difference and plot)
@@ -2255,14 +2260,14 @@ if __name__ == "__main__":
     # H0 = 1, neutrinos = 2, baryons = 3, CDM = 4, sigmag = 5, bg = 6, rg = 7, sigmau = 8, As = 9
    
     # H0 
-    derivative_power_spectra(cosmo_variable.H0, RSPS_variable.P_gg, 0.2, 'plot2', params, 2.5, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    derivative_power_spectra(cosmo_variable.H0, RSPS_variable.P_gg, 1.0, 'plot2', params, 0.5, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
     # mnu
-    derivative_power_spectra(cosmo_variable.mnu, RSPS_variable.P_gg, 0.2, 'plot2', params, 0.003, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
-    # Obh
-    derivative_power_spectra(cosmo_variable.Obh2, RSPS_variable.P_gg, 0.2, 'plot2', params, 0.0006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
-    # Och
-    derivative_power_spectra(cosmo_variable.Och2, RSPS_variable.P_gg, 0.2, 'plot2', params, 0.006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
-    
+    #derivative_power_spectra(cosmo_variable.mnu, RSPS_variable.P_gg, 1.0, 'plot2', params, 0.003, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    # # # Obh
+    #derivative_power_spectra(cosmo_variable.Obh2, RSPS_variable.P_gg, 1., 'plot2', params, 0.0006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    # # # Och
+    #derivative_power_spectra(cosmo_variable.Och2, RSPS_variable.P_gg, 1., 'plot2', params, 0.006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+
 
     # other parameters
     # sigmag
@@ -2276,7 +2281,7 @@ if __name__ == "__main__":
     # As
     #derivative_power_spectra(cosmo_variable.As, RSPS_variable.P_gg, 0.2, 'plot2', params, 0.1*1e-10, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
     # N_eff
-    derivative_power_spectra(cosmo_variable.Neff, RSPS_variable.P_gg, 0.2, 'plot2', params, 0.001, 1e-4, 0.2*(0.6732), 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    #derivative_power_spectra(cosmo_variable.Neff, RSPS_variable.P_gg, 0.2, 'plot2', params, 0.001, 1e-4, 0.2*(0.6732), 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
 
     # print(pk.shape)
     # print(k.shape)
