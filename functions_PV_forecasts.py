@@ -2207,7 +2207,7 @@ if __name__ == "__main__":
     # H0 = 1, neutrinos = 2, baryons = 3, CDM = 4, sigmag = 5, bg = 6, rg = 7, sigmau = 8, As = 9
    
     # H0 
-    #derivative_power_spectra(11, 1, 0.0, 'plot2', params, 0.01, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    derivative_power_spectra(11, 1, 1.0, 'plot2', params, 0.01, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
     # mnu
     #derivative_power_spectra(2, 1, 0.0, 'plot2', params, 0.0025, 1.0e-4, 1.0, 2000, 100, 0.0001, 'inverted', 'linear', 'log', tau, ns)
     # Obh   
