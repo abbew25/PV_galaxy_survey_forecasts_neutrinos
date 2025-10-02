@@ -151,7 +151,7 @@ def distortion_parallel(As_t: float, Obh2_t: float, Och2_t: float,
     H_z_fid = get_Hubble_z(z, Om_fid, H0_fid)
 
     q_para = (H_z_fid)/(H_z_t)
-
+   
     return q_para
 
 
@@ -175,6 +175,7 @@ def distortion_perpendicular(As_t: float, Obh2_t: float, Och2_t: float,
         q_perp = H0_fid / H0_t
     else:
         q_perp = (D_A_z_t)/(D_A_z_fid)
+        
 
     return q_perp
 
@@ -463,11 +464,11 @@ m_nu_fid: float, mus_arr: npt.NDArray, N_eff_deviation: float):
         return df_doc
 
     elif param == cosmo_variable.As:
-        lowf = growth_rate(omega_b_t, omega_cdm_t, H0_t, As_t+delta, m_nu_t, neutrino_hierarchy, zed, 
+        lowf = growth_rate(omega_b_t, omega_cdm_t, H0_t, As_t-delta, m_nu_t, neutrino_hierarchy, zed, 
         kmin, kmax, knum, d_a, del_mnu_max, sum_masses_central_t, 
         kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_arr, N_eff_deviation)[0]
 
-        highf = growth_rate(omega_b_t, omega_cdm_t, H0_t, As_t-delta, m_nu_t, neutrino_hierarchy, 
+        highf = growth_rate(omega_b_t, omega_cdm_t, H0_t, As_t+delta, m_nu_t, neutrino_hierarchy, 
         zed, kmin, kmax, knum, d_a, del_mnu_max, sum_masses_central_t, 
         kspaceoption, tau_t, ns_t, omega_b_fid, omega_cdm_fid, H0_fid, As_fid, m_nu_fid, mus_arr, N_eff_deviation)[0]
 
@@ -555,6 +556,7 @@ def dk_obs_dx(param: cosmo_variable, dF_dx: float, dq_perp_dx: float, mu: float,
         p2 = 1.0/p1
         res = -1.0*((k)/(q_perp**2))*p1*dq_perp_dx - ((k*(mu**2))/(q_perp*(F**3)))*p2*dF_dx
         return res
+    
 
     else: # Any other derivatives are always zero 
         msg = 'param value (o) is probably not correct / derivative is zero. (dk_obs_dx())'
@@ -596,6 +598,8 @@ def dmu_obs_dx(dF_dx: float, mu: float, F: float, param: cosmo_variable):
         raise (ValueError)
         
         
+        
+
 # function to compute the derivative of the perpendicular distortion parameter with respect to cosmological parameters 
 def dq_perp_distortion_dx(param: cosmo_variable, H0_t: float, H0_fid: float, Om_t: float, 
 Om_fid: float, z: float, c: float = 299792.458):
@@ -644,6 +648,7 @@ Om_fid: float, z: float, c: float = 299792.458):
         msg = 'param value (o) is probably not correct / derivative is zero. (dq_perp_distortion_dx()).'
         logger.error(msg)
         raise (ValueError)
+    
         
         
 # function to compute the derivative of the parallel distortion parameter with respect to cosmological parameters
@@ -659,7 +664,6 @@ def dq_para_distortion_dx(param: cosmo_variable, H0_t: float, H0_fid: float, Om_
     q_para = H_z_f/H_z_t
     E_z = H_z_t/H0_t
     
-
     if param == cosmo_variable.H0: #H0
         
         if z == 0:
@@ -688,7 +692,8 @@ def dq_para_distortion_dx(param: cosmo_variable, H0_t: float, H0_fid: float, Om_
         msg = 'param value (o) is probably not correct (dq_para_distortion_dx()).'
         logger.error(msg)
         raise (ValueError)
-
+    
+   
 # get derivatives of galaxy galaxy power spectrum w.r.t. relevant parameter (need to pass in P_mm and dP_dx)
 def dP_gg_dx(param: cosmo_variable, bg: float, rg: float, f_t: npt.NDArray, df_dx_t: npt.NDArray, mu_obs: float, k_obs: npt.NDArray, 
 sigmag: float, P_mm_t: npt.NDArray, dP_mm_dx_t: npt.NDArray, z: float, H0_t: float, dmu_obs_dx: float, dk_obs_dx: npt.NDArray, 
@@ -1371,7 +1376,7 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
                 dmuobs_dx = 0
                 
             if P == RSPS_variable.P_gg:
-                
+    
                 results_findiff_semi_analytic_derivatives[i, muu, :] = dP_gg_dx(o, bg, rg, growth_rates_arr[3, muu, :], df_dx[muu,:],
                 mus_obs_arr[3,muu], ks_obs_arr[3, muu, :], sigmag, matter_power_spectrum_arr[3,muu,:], matter_central_diffs[i, muu,:],
                 z, H0, dmuobs_dx, dkobs_dx, q_parallel, q_perp, dq_para_dx, dq_perp_dx, includeAP=True)
@@ -2260,14 +2265,40 @@ if __name__ == "__main__":
     # H0 = 1, neutrinos = 2, baryons = 3, CDM = 4, sigmag = 5, bg = 6, rg = 7, sigmau = 8, As = 9
    
     # H0 
-    #derivative_power_spectra(cosmo_variable.H0, RSPS_variable.P_gg, 1.0, 'plot2', params, 3.0, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    derivative_power_spectra(cosmo_variable.H0, RSPS_variable.P_gg, 1.0, 'plot2', params, 3.0, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
     # mnu
     #derivative_power_spectra(cosmo_variable.mnu, RSPS_variable.P_gg, 1.0, 'plot2', params, 0.001, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
     # # # Obh
-    derivative_power_spectra(cosmo_variable.Obh2, RSPS_variable.P_gg, 1., 'plot2', params, 0.0006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    # derivative_power_spectra(cosmo_variable.Obh2, RSPS_variable.P_gg, 1., 'plot2', params, 0.0006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
     # # # Och
     #derivative_power_spectra(cosmo_variable.Och2, RSPS_variable.P_gg, 1., 'plot2', params, 0.006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
 
+    # for ztest in [0.1, 0.5, 1.0, 1.5, 2.0]:
+        
+        
+    #     mu = 0.5 
+    #     oldpara = dq_para_distortion_dx(cosmo_variable.H0, H0_t=H0, H0_fid=H0, Om_t=get_Om_0(Obh, Och, mnu, H0),
+    #                             Om_fid=get_Om_0(Obh, Och, mnu, H0), z=ztest)
+    #     oldperp = dq_perp_distortion_dx(cosmo_variable.H0, H0_t=H0, H0_fid=H0, Om_t=get_Om_0(Obh, Och, mnu, H0),
+    #                             Om_fid=get_Om_0(Obh, Och, mnu, H0), z=ztest)
+    #     oldF = dF_distortion_dx(cosmo_variable.H0, 1.0, H0, ztest, get_Om_0(Obh, Och, mnu, H0), H0, get_Om_0(Obh, Och, mnu, H0), 1.0, 1.0)
+        
+    #     oldk = dk_obs_dx(cosmo_variable.H0, oldF, oldperp, mu, 1.0, 1.0, 1.0)
+    #     oldmu = dmu_obs_dx(oldF, mu, 1.0, cosmo_variable.H0)
+        
+    #     newk = (get_ks_realobs(1.0, As, Obh, Och, H0+0.1, mnu, As, Obh, Och, H0, mnu, ztest, mu) -
+    #     get_ks_realobs(1.0, As, Obh, Och, H0-0.1, mnu, As, Obh, Och, H0, mnu, ztest, mu))/(2*0.1)
+    #     newmu = (get_mus_realobs(mu, As, Obh, Och, H0+0.1, mnu, As, Obh, Och, H0, mnu, ztest) -
+    #     get_mus_realobs(mu, As, Obh, Och, H0-0.1, mnu, As, Obh, Och, H0, mnu, ztest))/(2*0.1)
+
+    #     print(ztest, "dk/dH0 old:", oldk, "new:", newk, "rel diff:", (newk-oldk)/max(abs(oldk),1e-12))
+
+    #     print(ztest, "dmu/dH0 old:", oldmu, "new:", newmu, "rel diff:", (newmu-oldmu)/max(abs(oldmu),1e-12))
+        
+        # new = (dq_para_distortion_dx(cosmo_variable.H0, H0_t=H0+0.1, H0_fid=H0, Om_t=get_O  
+        # new = (distortion_parallel(As, Obh, Och, H0+0.1, mnu, As, Obh, Och, H0, mnu, ztest) -
+        # distortion_parallel(As, Obh, Och, H0-0.1, mnu, As, Obh, Och, H0, mnu, ztest))/(2*0.1) 
+        # print(ztest, "dq_para/dH0 old:", old, "new:", new, "rel diff:", (new-old)/max(abs(old),1e-12))
 
     # other parameters
     # sigmag
