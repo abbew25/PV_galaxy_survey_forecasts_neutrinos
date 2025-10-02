@@ -191,7 +191,7 @@ forecasting_params = {
     'survey_area':survey_area,                                  
     'error_rand': error_rand, 
     'error_dist': error_dist,
-    #'Data': Data,
+    'Data': Data,
     'nparams': nparams,
     'verbosity': verbosity,
     'dm2_atm': dm2_atm,

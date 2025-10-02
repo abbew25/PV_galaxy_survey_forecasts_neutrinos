@@ -1254,7 +1254,7 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
             elif P == RSPS_variable.P_ug: # redshift galaxy velocity
                 
                 pkrss = matter_power_spectrum_arr[i,j,:]*(gu_redshift_s(bg, rg, growth_rates_arr[i, j, :], 
-                sigmag, sigmau, mus_obs_arr[i,j], ks_obs_arr[i,j,:], z,H0, omegam, 1.0-omegam, q_para, q_perp))
+                sigmag, sigmau, mus_obs_arr[i,j], ks_obs_arr[i,j,:], z, H0, omegam, 1.0-omegam, q_para, q_perp))
                 results_redshiftspacepowerspectrum_arr[i,j,:] = pkrss 
 
             elif P == RSPS_variable.P_uu: # redshift velocity velocity 
@@ -1296,7 +1296,6 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
     H0 = H0_central
     sigmag = sigmag_central/h
     sigmau = sigmau_central/h
-    hsqrd = h**2
     bg = bg_central
     rg = rg_central
     Obh = Obh_central
@@ -1545,10 +1544,11 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
     elif plot2 == True:
 
         h = H0_central/100.0 # need to initialise little h
-        #results_findiff_derivatives *= (h)**3 # putting into units of (MPC/h)^3/x
-        #results_findiff_semi_analytic_derivatives *= (h)**3 # putting into units of (MPC/h)^3/x, x being the units of the parameter
-        #ks_obs_arr /= (H0_central/100.0) # put ks into units of k/h MPc 
-        #ks_fiducial /= (H0_central/100.0) # put ks into units of k/h MPc
+        ks_obs_arr /= (H0_central/100.0) # put ks into units of k/h MPc
+        results_findiff_derivatives *= (H0_central/100.0)**3 # putting into units of (MPC/h)^3/x
+        results_findiff_semi_analytic_derivatives *= (H0_central/100.0)**3 # putting into units of (MPC/h)^3/x, x being the units of the parameter
+        ks_fiducial /= (H0_central/100.0) # put ks into units of k/h MPc
+        # that is being varied 
         # that is being varied 
     
         # getting mus we would like to plot 
@@ -1615,20 +1615,20 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
 
             dP_dtheta = results_findiff_derivatives[j, mu_indices[0], :]
             
-            #ax.semilogx(ks_fiducial, abs(dP_dtheta-dP_dtheta0_mu1)/dP_dtheta0_mu1, label = label+r", $ \mu = %.2f $" % mus[mu_indices[0]], color = colors[count])
-            ax.semilogx(ks_obs_arr[3,mu_indices[0],:]/(h), abs(dP_dtheta-dP_dtheta0_mu1)/dP_dtheta0_mu1, label = label, color = colors[count])
-            #ax1.semilogx(ks_fiducial, dP_dtheta, label = label+r", $ \mu = %.2f $" % mus[mu_indices[0]], color = colors[count] )
-            ax1.semilogx(ks_obs_arr[3,mu_indices[0],:]/(h), dP_dtheta, label = label, color = colors[count] )
+            ax.semilogx(ks_fiducial, abs(dP_dtheta-dP_dtheta0_mu1)/dP_dtheta0_mu1, label = label+r", $ \mu = %.2f $" % mus[mu_indices[0]], color = colors[count])
+            #ax.semilogx(ks_obs_arr[3,mu_indices[0],:]/(h), abs(dP_dtheta-dP_dtheta0_mu1)/dP_dtheta0_mu1, label = label, color = colors[count])
+            ax1.semilogx(ks_fiducial, dP_dtheta, label = label+r", $ \mu = %.2f $" % mus[mu_indices[0]], color = colors[count] )
+            #ax1.semilogx(ks_obs_arr[3,mu_indices[0],:]/(h), dP_dtheta, label = label, color = colors[count] )
 
             count += 1
 
 
             dP_dtheta = results_findiff_derivatives[j, mu_indices[1], :]
 
-            #ax.semilogx(ks_fiducial, abs(dP_dtheta-dP_dtheta0_mu2)/dP_dtheta0_mu2, linestyle = '-.', label = label+r", $ \mu = %.2f $" % mus[mu_indices[1]], color = colors[count] )
-            ax.semilogx(ks_obs_arr[3,mu_indices[1],:]/(h), abs(dP_dtheta-dP_dtheta0_mu2)/dP_dtheta0_mu2, linestyle = '-.', label = label, color = colors1[count1] )
-            #ax1.semilogx(ks_fiducial, dP_dtheta, linestyle = '-.', label = label+r", $ \mu = %.2f $" % mus[mu_indices[1]], color = colors[count] )
-            ax1.semilogx(ks_obs_arr[3,mu_indices[1],:]/(h), dP_dtheta, linestyle = '-.', label = label, color = colors1[count1] )
+            ax.semilogx(ks_fiducial, abs(dP_dtheta-dP_dtheta0_mu2)/dP_dtheta0_mu2, linestyle = '-.', label = label+r", $ \mu = %.2f $" % mus[mu_indices[1]], color = colors[count1] )
+            #ax.semilogx(ks_obs_arr[3,mu_indices[1],:]/(h), abs(dP_dtheta-dP_dtheta0_mu2)/dP_dtheta0_mu2, linestyle = '-.', label = label, color = colors1[count1] )
+            ax1.semilogx(ks_fiducial, dP_dtheta, linestyle = '-.', label = label+r", $ \mu = %.2f $" % mus[mu_indices[1]], color = colors[count1] )
+            #ax1.semilogx(ks_obs_arr[3,mu_indices[1],:]/(h), dP_dtheta, linestyle = '-.', label = label, color = colors1[count1] )
             count1 += 1
 
 
@@ -1661,19 +1661,19 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
 
             dP_dtheta = results_findiff_semi_analytic_derivatives[j, mu_indices[0], :]
                 
-            #ax.semilogx(ks_fiducial, abs(dP_dtheta-dP_dtheta0_mu1)/dP_dtheta0_mu1, label = label+r", $ \mu = %.2f $" % mus[mu_indices[0]], color = colors[count])
-            ax.semilogx(ks_obs_arr[3,mu_indices[0],:]/h, abs(dP_dtheta-dP_dtheta0_mu1)/dP_dtheta0_mu1, label = label, color = colors[count])
-            #ax1.semilogx(ks_fiducial, dP_dtheta, label = label+r", $ \mu = %.2f $" % mus[mu_indices[0]], color = colors[count] )
-            ax1.semilogx(ks_obs_arr[3,mu_indices[0],:]/h, dP_dtheta, label = label, color = colors[count] )
+            ax.semilogx(ks_fiducial, abs(dP_dtheta-dP_dtheta0_mu1)/dP_dtheta0_mu1, label = label+r", $ \mu = %.2f $" % mus[mu_indices[0]], color = colors[count])
+            #ax.semilogx(ks_obs_arr[3,mu_indices[0],:]/h, abs(dP_dtheta-dP_dtheta0_mu1)/dP_dtheta0_mu1, label = label, color = colors[count])
+            ax1.semilogx(ks_fiducial, dP_dtheta, label = label+r", $ \mu = %.2f $" % mus[mu_indices[0]], color = colors[count] )
+            #ax1.semilogx(ks_obs_arr[3,mu_indices[0],:]/h, dP_dtheta, label = label, color = colors[count] )
             count += 1
 
 
             dP_dtheta = results_findiff_semi_analytic_derivatives[j, mu_indices[1], :]
 
-            #ax.semilogx(ks_fiducial, abs(dP_dtheta-dP_dtheta0_mu2)/dP_dtheta0_mu2, linestyle = '-.', label = label+r", $ \mu = %.2f $" % mus[mu_indices[1]], color = colors[count])
-            ax.semilogx(ks_obs_arr[3,mu_indices[1],:]/h, abs(dP_dtheta-dP_dtheta0_mu2)/dP_dtheta0_mu2, linestyle = '-.', label = label, color = colors1[count1])
-            #ax1.semilogx(ks_fiducial, dP_dtheta, linestyle = '-.', label = label+r", $ \mu = %.2f $" % mus[mu_indices[1]], color = colors[count] )
-            ax1.semilogx(ks_obs_arr[3,mu_indices[1],:]/h, dP_dtheta, linestyle = '-.', label = label, color = colors1[count1] )
+            ax.semilogx(ks_fiducial, abs(dP_dtheta-dP_dtheta0_mu2)/dP_dtheta0_mu2, linestyle = '-.', label = label+r", $ \mu = %.2f $" % mus[mu_indices[1]], color = colors[count1])
+            #ax.semilogx(ks_obs_arr[3,mu_indices[1],:]/h, abs(dP_dtheta-dP_dtheta0_mu2)/dP_dtheta0_mu2, linestyle = '-.', label = label, color = colors1[count1])
+            ax1.semilogx(ks_fiducial, dP_dtheta, linestyle = '-.', label = label+r", $ \mu = %.2f $" % mus[mu_indices[1]], color = colors[count1] )
+            #ax1.semilogx(ks_obs_arr[3,mu_indices[1],:]/h, dP_dtheta, linestyle = '-.', label = label, color = colors1[count1] )
             count1 += 1
 
 
@@ -2260,11 +2260,11 @@ if __name__ == "__main__":
     # H0 = 1, neutrinos = 2, baryons = 3, CDM = 4, sigmag = 5, bg = 6, rg = 7, sigmau = 8, As = 9
    
     # H0 
-    derivative_power_spectra(cosmo_variable.H0, RSPS_variable.P_gg, 1.0, 'plot2', params, 0.5, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    #derivative_power_spectra(cosmo_variable.H0, RSPS_variable.P_gg, 1.0, 'plot2', params, 3.0, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
     # mnu
-    #derivative_power_spectra(cosmo_variable.mnu, RSPS_variable.P_gg, 1.0, 'plot2', params, 0.003, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    #derivative_power_spectra(cosmo_variable.mnu, RSPS_variable.P_gg, 1.0, 'plot2', params, 0.001, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
     # # # Obh
-    #derivative_power_spectra(cosmo_variable.Obh2, RSPS_variable.P_gg, 1., 'plot2', params, 0.0006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    derivative_power_spectra(cosmo_variable.Obh2, RSPS_variable.P_gg, 1., 'plot2', params, 0.0006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
     # # # Och
     #derivative_power_spectra(cosmo_variable.Och2, RSPS_variable.P_gg, 1., 'plot2', params, 0.006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
 
