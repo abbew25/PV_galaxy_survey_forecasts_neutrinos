@@ -27,7 +27,7 @@ data_from_MCMC_chains = 'No planck data included'
 if MCMC_chains_option == 1:
     data_from_MCMC_chains = 'Planck 2018 PlikHM TT + TE + EE + lowE + lowl'
 elif MCMC_chains_option == 2:
-    data_from_MCMC_chains = 'Planck 2018 PlikHM TT + TE + EE + lowE + lowl + lensing /Planck 2018 PlikHM TT + TE + EE + lowE + lowl (N_eff is free)'
+    data_from_MCMC_chains = 'Planck 2018 PlikHM TT + TE + EE + lowE + lowl + lensing /Planck 2018 PlikHM TT + TE + EE + lowE + lowl (no lensing if N_eff is free)'
 else:
     raise Exception('Flags for including information from Planck may only be: 1, 2')
 
@@ -105,18 +105,18 @@ error_dist = 0.20                               # The percentage error on the di
 #  A list of flags for the parameters we are interested in varying in the analysis/free parameters - comment out parameters you don't want
 # Ordering of parameters here is best and shouldn't be altered, just comment out lines for parameters you do not want to include in forecasting analysis.
 Data = [                                        
-    cosmo_variable.H0,                  # H0
-    cosmo_variable.As,                  # As
-    cosmo_variable.Obh2,                # Obh
-    cosmo_variable.Och2,                # Och
-    cosmo_variable.mnu,                 # mnu
-    cosmo_variable.Neff,                # N_eff (effective number of neutrino species)  
-    cosmo_variable.n_s,                 # ns
-    cosmo_variable.b_g,                 # galaxy bias b_g
-    #cosmo_variable.r_g,                 # r_g
-    cosmo_variable.sigma_u,             # sigma_u
-    cosmo_variable.sigma_g,             # sigma_g
-        ] 
+    0, #cosmo_variable.H0,                  # H0
+    1, #cosmo_variable.As,                  # As
+    2, #cosmo_variable.Obh2,                # Obh
+    3, #cosmo_variable.Och2,                # Och
+    4, #cosmo_variable.mnu,                 # mnu
+    13, #cosmo_variable.Neff,                # N_eff (effective number of neutrino species)  
+    14, #cosmo_variable.n_s,                 # ns
+    7, #cosmo_variable.b_g,                 # galaxy bias b_g
+    8, #cosmo_variable.r_g,                 # r_g
+    9, #cosmo_variable.sigma_u,             # sigma_u
+    10 #cosmo_variable.sigma_g,             # sigma_g
+        ]  
 
 
 nparams = len(Data)                             # The number of free parameters (don't alter this)

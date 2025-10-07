@@ -277,17 +277,18 @@ linornonlin: str, N_eff_deviation: float):
         logger.error(msg)
         raise (ValueError)
     
+    
     if linornonlin == 'linear':
         # set up TRUE cosmology
-        M.set({"omega_b": omega_b_t, "omega_cdm": omega_cdm_t, "H0": H0_t, "A_s": As_t, "N_ur": 0.00641+N_eff_deviation, 
-        "N_ncdm": 3.0,  
+        M.set({"omega_b": omega_b_t, "omega_cdm": omega_cdm_t, "H0": H0_t, "A_s": As_t, "N_ur": 0.106+N_eff_deviation, 
+        "N_ncdm": 3.0, "T_ncdm": "0.71,0.71,0.71",
         "m_ncdm": mass_input_string, "tau_reio": tau_t, "n_s": ns_t})
         M.set({"output": "mPk", "P_k_max_1/Mpc": 5.0, "z_max_pk": 2.0})
         
     elif linornonlin == 'nonlinear':
         # set up TRUE cosmology
-        M.set({"omega_b": omega_b_t, "omega_cdm": omega_cdm_t, "H0": H0_t, "A_s": As_t, "N_ur": 0.00641+N_eff_deviation, 
-        "N_ncdm": 3.0, 
+        M.set({"omega_b": omega_b_t, "omega_cdm": omega_cdm_t, "H0": H0_t, "A_s": As_t, "N_ur": 0.106+N_eff_deviation, 
+        "N_ncdm": 3.0, "T_ncdm": "0.71,0.71,0.71",
         "m_ncdm": mass_input_string, "tau_reio": tau_t, "n_s": ns_t})
         M.set({"output": "mPk", "P_k_max_1/Mpc": 3.0, "z_max_pk": 2.0, 'non linear': 'Halofit'})
         
@@ -297,6 +298,7 @@ linornonlin: str, N_eff_deviation: float):
         raise (ValueError)
 
     M.compute() 
+    
     
     # now to compute the power spectrum at the observed (k, mu) given (k, mu actual) -------------------------------------------
 
@@ -1916,8 +1918,8 @@ kspaceoption: str, tau_t: float, ns_t: float, N_eff_deviation: float, delta_mnu_
         raise (ValueError)
 
     # set up cosmology
-    M.set({"omega_b": omega_b_t, "omega_cdm": omega_cdm_t, "H0": H0_t, "A_s": As_t, "N_ur": 0.00641+N_eff_deviation, 
-    "N_ncdm": 3.0, 
+    M.set({"omega_b": omega_b_t, "omega_cdm": omega_cdm_t, "H0": H0_t, "A_s": As_t, "N_ur": 0.106+N_eff_deviation, 
+    "N_ncdm": 3.0, "T_ncdm": "0.71, 0.71, 0.71",
     "m_ncdm": mass_input_string, "tau_reio": tau_t, "n_s": ns_t})
     M.set({"output": "mPk", "P_k_max_1/Mpc": 3.0, "z_max_pk": 2.0})
 
@@ -2024,7 +2026,7 @@ kspaceoption: str, tau_t: float, ns_t: float, N_eff_deviation: float, delta_mnu_
 # using a single simple 2nd order finite difference , quickly
 def get_rsp_dP_dx_cosmo_many_redshifts(o: cosmo_variable, zed_list: list, central_params: list, delta_param: float, 
 kmin: float, kmax: float, num_k_points: int, mu_s: npt.NDArray, d_a: float, neutrino_hier: str, lin_or_nonlin: str, kspaceoption: str, 
-tau: float, ns: float, N_eff_deviation: float):
+tau: float, ns: float, N_eff_deviation: float, dm2_atm: float = 2.44e-3, dm2_sol: float = 7.53e-5):
 
     '''
     Quickly computes dP_xx_dy for a single parameter y for all redshift space power spectra,
@@ -2133,12 +2135,12 @@ tau: float, ns: float, N_eff_deviation: float):
 
 
         Pk_cb, ks_obs, mus_obs = run_class(Obh, Och, H0, As, mnu, neutrino_hier, zed_list, kmin, 
-        kmax, num_k_points, dm2_atm, dm2_sol, delta_mnu_max, mnu_central, kspaceoption, tau, ns_val, 
+        kmax, num_k_points, delta_mnu_max, mnu_central, kspaceoption, tau, ns_val, 
         Obh_central, Och_central, H0_central, As_central, mnu_central, mu_s, lin_or_nonlin, N_eff_deviation)
             
 
         f = compute_f_at_many_redshifts(Obh, Och, H0, As, mnu, neutrino_hier, zed_list, kmin, kmax, mu_s, 
-        num_k_points, d_a, linear, mnu_central, Obh_central, Och_central, H0_central, As_central, mnu_central, 
+        num_k_points, d_a, mnu_central, Obh_central, Och_central, H0_central, As_central, mnu_central, 
         kspaceoption, tau, ns_val, N_eff_deviation, delta_mnu_max=delta_mnu_max)[0]
             
 
@@ -2181,7 +2183,7 @@ tau: float, ns: float, N_eff_deviation: float):
             for muu in np.arange(len(mu_s)): # looping through mu
                     
                 redshift_space_power_spectra_gg[i, muu, :, zz] = gg_redshift_s(b_g[zz], r_g, growth_rate_arr[i, muu, :, zz],
-                sigmag, mus_obs_arr[i, muu, zz], ks_obs_arr[i, muu, :, zz], zed_list[zz], H0, q_para, 
+                sigmag, mus_obs_arr[i, muu, zz], ks_obs_arr[i, muu, :, zz], q_para, 
                 q_perp)*matter_power_spectra_arr[i,muu,:,zz]
                 
                 redshift_space_power_spectra_gu[i, muu, :, zz] = gu_redshift_s(b_g[zz], r_g, growth_rate_arr[i, muu, :, zz],

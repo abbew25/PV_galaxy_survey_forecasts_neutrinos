@@ -2,7 +2,8 @@
 import matplotlib.pyplot as plt 
 import numpy as np 
 import scipy as sp 
-from scipy.integrate import simps, quad
+from scipy.integrate import simpson as simps 
+from scipy.integrate import quad    
 from scipy.interpolate import CubicSpline
 import pandas as pd
 from classy import Class
@@ -31,6 +32,20 @@ mapping_index_dict = {
     cosmo_variable.sigma_u: 9,
     cosmo_variable.sigma_g: 10
 } 
+
+mapping_index_dict_inverse = {
+    '0': cosmo_variable.H0,
+    '1': cosmo_variable.As,
+    '2': cosmo_variable.Obh2,
+    '3': cosmo_variable.Och2,
+    '4': cosmo_variable.mnu,
+    '13': cosmo_variable.Neff,
+    '14': cosmo_variable.n_s,
+    '7': cosmo_variable.b_g,
+    '8': cosmo_variable.r_g,
+    '9': cosmo_variable.sigma_u,
+    '10': cosmo_variable.sigma_g
+}
  
  
 #--------------------------------------------------------------------------------------------------------------------------------------
@@ -409,7 +424,7 @@ def E_z(z: float):
 
 
 # function that computes the proper distance as a function of redshift (dimensionless)
-def rz(red: npt.Union[float, npt.NDArray]):
+def rz(red: any):
     '''
     Calculates the proper radial distance to an object at redshift z for the given cosmological model.
     '''
@@ -586,22 +601,22 @@ def read_power():
 
     except:
 
-        pmm_array = cosmo.run_class(Obh, Och, H0, As, m_nu, n_h, N_redshifts_arr, k1, k2, numk_vals, dm2_atm, dm2_sol, del_Mnu, m_nu,
+        pmm_array = cosmo.run_class(Obh, Och, H0, As, m_nu, n_h, N_redshifts_arr, k1, k2, numk_vals, del_Mnu, m_nu,
         'lin_ks', tau, ns, Obh, Och, H0, As, m_nu, np.linspace(0.0, 1.0, num_mus), lin_or_nonlin, 0.0)[0]
         pmt_array = pmm_array
         ptt_array = pmm_array
 
 
         growth_rate_array = cosmo.compute_f_at_many_redshifts(Obh, Och, H0, As, m_nu, n_h, N_redshifts_arr, k1, k2,
-        np.linspace(0.0, 1.0, num_mus), numk_vals, d_a, linear, m_nu, Obh, Och, H0, As, m_nu, 'lin_ks', tau, ns, 0.0, delta_mnu_max=del_Mnu)[0]
+        np.linspace(0.0, 1.0, num_mus), numk_vals, d_a, m_nu, Obh, Och, H0, As, m_nu, 'lin_ks', tau, ns, 0.0, delta_mnu_max=del_Mnu)[0]
                 
                 
         # get the value of the power spectrum at z = 0, kmin (in linear theory specifically)
-        pmm_kmin = cosmo.run_class(Obh, Och, H0, As, m_nu, n_h, N_redshifts_arr, k1, k2, numk_vals, dm2_atm, dm2_sol, del_Mnu, m_nu,
+        pmm_kmin = cosmo.run_class(Obh, Och, H0, As, m_nu, n_h, N_redshifts_arr, k1, k2, numk_vals, del_Mnu, m_nu,
         'lin_ks', tau, ns, Obh, Och, H0, As, m_nu, np.linspace(0.0, 1.0, num_mus), 'linear', 0.0)[0]
         pmm_kmin_array = pmm_kmin[kmin_overall_index, :]
 
-        pmm_0_kmin = cosmo.run_class(Obh, Och, H0, As, m_nu, n_h, [0.0], k1, k2, numk_vals, dm2_atm, dm2_sol, del_Mnu, m_nu,
+        pmm_0_kmin = cosmo.run_class(Obh, Och, H0, As, m_nu, n_h, [0.0], k1, k2, numk_vals, del_Mnu, m_nu,
         'lin_ks', tau, ns, Obh, Och, H0, As, m_nu, np.linspace(0.0, 1.0, num_mus), 'linear', 0.0)[0][kmin_overall_index, 0]
 
 
@@ -647,6 +662,7 @@ def read_power():
             dPdH_arr_gg = pickle.load( open(check_str, 'rb') )['dPdH_arr_gg']
             dPdH_arr_gu = pickle.load( open(check_str, 'rb') )['dPdH_arr_gu']
             dPdH_arr_uu = pickle.load( open(check_str, 'rb') )['dPdH_arr_uu']
+        
 
         except:
 
@@ -701,6 +717,7 @@ def read_power():
             dPdObh2_arr_gg = pickle.load( open(check_str, 'rb') )['dPdObh2_arr_gg']
             dPdObh2_arr_gu = pickle.load( open(check_str, 'rb') )['dPdObh2_arr_gu']
             dPdObh2_arr_uu = pickle.load( open(check_str, 'rb') )['dPdObh2_arr_uu']
+            
 
         except:
 
@@ -880,8 +897,8 @@ def z_eff_integrand(mu: float, datalist1: list):
         # set up redshift space spectra 
 
        
-        P_gg = cosmo.gg_redshift_s_at_k_real(b_g_z, r_g, f, sigma_gh/h, mu, k, zval, H0, 1.0, 1.0)*pmm
-        P_uu = cosmo.uu_redshift_s_at_k_real(sigma_uh/h, mu, f, k, zval, H0, Om, 1.0-Om, 1.0, 1.0)*ptt
+        P_gg = cosmo.gg_redshift_s(b_g_z, r_g, f, sigma_gh/h, mu, k, 1.0, 1.0)*pmm
+        P_uu = cosmo.uu_redshift_s(sigma_uh/h, mu, f, k, zval, H0, Om, 1.0-Om, 1.0, 1.0)*ptt
 
     
         # We need to do the overlapping and non-overlapping parts of the redshifts and PV surveys separately
@@ -932,7 +949,7 @@ def get_dCdx_matrix_elements(val_o: cosmo_variable, list_vals: list):
     '''
 
     kv, zvalv, pmmv, pmtv, pttv, muv, f, D_g, D_u, b_g_z, zindex, kindex = list_vals 
-
+    
     df_dx, dp_mm_dx = 0, 0
 
     m1, m2, m3, m4 = 0, 0, 0, 0
@@ -1031,7 +1048,7 @@ def get_dCdx_matrix_elements(val_o: cosmo_variable, list_vals: list):
         m4 = 0
 
 
-    elif val_o == cosmo_variable.N_eff: # varying N_eff
+    elif val_o == cosmo_variable.Neff: # varying N_eff
 
         m1 = dPdNeff_arr_gg[:, kindex, zindex]
         m2 = dPdNeff_arr_gu[:, kindex, zindex]
@@ -1097,7 +1114,6 @@ def mu_integrand(mu: float, datalist1: list): # function to be integrated over m
         # get the galaxy bias at this redshift 
         b_g_z = galaxy_bias_array[zz]
 
-
         datalist_for_derivs = [k, zval, pmm, pmt, ptt, mu, f, D_g, D_u, b_g_z, zz, k_index]
         
         # initialize covariance matrix elements 
@@ -1110,9 +1126,9 @@ def mu_integrand(mu: float, datalist1: list): # function to be integrated over m
         # need to calculate P_uu, P_ug, P_gg etc. 
 
         
-        P_gg = cosmo.gg_redshift_s_at_k_real(b_g_z, r_g, f, sigma_gh/h, mu, k, zval, H0, 1.0, 1.0)*pmm
-        P_uu = cosmo.uu_redshift_s_at_k_real(sigma_uh/h, mu, f, k, zval, H0, Om, 1.0-Om, 1.0, 1.0)*ptt
-        P_ug = cosmo.gu_redshift_s_at_k_real(b_g_z, r_g, f, sigma_gh/h, sigma_uh/h, mu, k, zval, H0, 
+        P_gg = cosmo.gg_redshift_s(b_g_z, r_g, f, sigma_gh/h, mu, k, 1.0, 1.0)*pmm
+        P_uu = cosmo.uu_redshift_s(sigma_uh/h, mu, f, k, zval, H0, Om, 1.0-Om, 1.0, 1.0)*ptt
+        P_ug = cosmo.gu_redshift_s(b_g_z, r_g, f, sigma_gh/h, sigma_uh/h, mu, k, zval, H0, 
         Om, 1.0-Om, 1.0, 1.0)*pmt
         
 
@@ -1180,14 +1196,17 @@ def mu_integrand(mu: float, datalist1: list): # function to be integrated over m
 # run the main code to compute the Fisher matrix 
 if __name__ == "__main__": 
 
+    
     # setting up ---------------------------------------------------------------------------------------------
     # read in the survey number densities + set up arrays for integration
+    
+    Dataln = [Data[i] for i in range(nparams)] # list of parameters we are interested in
+    Data = [mapping_index_dict_inverse[str(Dataln[i])] for i in range(nparams)] # convert to cosmo_variable enum list
     read_nz() 
     
     # read in the power spectra, growth rate array, derivatives of power spectra w.r.t. different parameters of interest 
     read_power()
     
-    Dataln = [mapping_index_dict[Data[i]] for i in range(nparams)] # list of parameters to be varied numerically
     # get the Planck 2018 results covariance matrix for the base LCDM parameters 
     if include_Planck_base_LCDM_2018 and (0 in Dataln or 1 in Dataln or 2 in Dataln or 3 in Dataln or 4 in Dataln or 13 in Dataln or 14 in Dataln):
         get_Planck18_MCMC(Dataln)
@@ -1245,7 +1264,8 @@ if __name__ == "__main__":
     inverted_Fisher_matrix_total = np.zeros((nparams, nparams))
     inverted_Fisher_matrix_total = np.matrix(inverted_Fisher_matrix_total) 
 
-    console.log("Evaluating the Fisher Matrix for %d redshift bins between [z_min = %.3f, z_max = %.3f]" % (num_redshift_bins, zmin, zmax))
+    message = f"Evaluating the Fisher Matrix for {num_redshift_bins} redshift bins between [z_min = {zmin:.3f}, z_max = {zmax:.3f}]"
+    console.log(message)
     
     # iterating through redshift bins 
     for ziter in range(num_redshift_bins): 
@@ -1265,7 +1285,8 @@ if __name__ == "__main__":
 
         # give information of min and max k modes
         if (verbosity > 0):
-            console.log("Evaluating the Fisher matrix with [k_min = %.6f, k_max = %.6f] and [z_min = %.3f, z_max = %.3f]" % (kmin, kmax, zmin_iter, zmax_iter))
+            message = f"Evaluating the Fisher matrix with k_min = {kmin:.6f}, k_max = {kmax:.6f} and z_min = {zmin_iter:.3f}, z_max = {zmax_iter:.3f}"
+            console.log(message)
 
 
         # Calculate the effective redshift (which has been based on the sum of the S/N for the density and velocity fields)
