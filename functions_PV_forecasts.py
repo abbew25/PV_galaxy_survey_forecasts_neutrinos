@@ -1208,42 +1208,42 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
         omegam = get_Om_0(Obh, Och, mnu, H0)
         
         
-        Pk_cb, ks, mus = run_class(Obh, Och, H0, As, mnu, neutrino_hier, [z], kmin, kmax, num_k_points,
+        Pk_cb, ks_, mus_ = run_class(Obh, Och, H0, As, mnu, neutrino_hier, [z], kmin, kmax, num_k_points,
         delta_mnu_max, mnu_central, kspaceoption, tau, ns_val, Obh_central, Och_central, H0_central, As_central, mnu_central, mus, lin_or_nonlin,
         N_eff_deviation)
-        #print(mus.shape)
 
         f = growth_rate(Obh, Och, H0, As, mnu, neutrino_hier, z, kmin, kmax, num_k_points, da,
         delta_mnu_max, mnu_central, kspaceoption, tau, ns_val, Obh_central, Och_central, H0_central, As_central, mnu_central, mus,
         N_eff_deviation)[0]
 
 
-        if Pk_cb.shape == (num_mus, num_k_points, 1) and ks.shape == (num_mus, num_k_points, 1) and f.shape == (num_mus, num_k_points):
-
+        if Pk_cb.shape == (num_mus, num_k_points, 1) and ks_.shape == (num_mus, num_k_points, 1) and f.shape == (num_mus, num_k_points):
+            # mus = mus.flatten()
             matter_power_spectrum_arr[i,:,:] = Pk_cb[:,:,0] # storing the matter power spectrum for all ks and mus (real)
-            ks_obs_arr[i,:,:] = ks[:,:,0]
-            mus_obs_arr[i,:] = mus[:,0]
+            ks_obs_arr[i,:,:] = ks_[:,:,0]
+            mus_obs_arr[i,:] = mus_[:,0]
             growth_rates_arr[i,:,:] = f
 
 
-        elif Pk_cb.shape == (num_k_points, 1) and ks.shape == (num_k_points,) and f.shape == (num_k_points,):
+        elif Pk_cb.shape == (num_k_points, 1) and ks_.shape == (num_k_points,) and f.shape == (num_k_points,):
 
-            mus = mus.flatten()
+            # mus = mus.flatten()
             for muu in np.arange(num_mus):
                 matter_power_spectrum_arr[i,muu,:] = Pk_cb[:,0] # just storing the same matter power spectrum since the k modes don't change with mu
-                ks_obs_arr[i,muu,:] = ks 
+                ks_obs_arr[i,muu,:] = ks_fiducial 
                 growth_rates_arr[i,muu,:] = f 
-                mus_obs_arr[i,:] = mus
+                mus_obs_arr[i,:] = mus 
 
 
         else:
             print('shape Pk_cb: ', Pk_cb.shape)
-            print('shape ks: ', ks.shape)
-            print('shape mus:', mus.shape)
+            print('shape ks: ', ks_.shape)
+            print('shape mus:', mus_.shape)
             print('shape f: ', f.shape)
             msg = 'The shapes of the Pk_cb, ks, mus, and f arrays are not what we expect (derivative_power_spectra())'
             logger.error(msg)
             raise ValueError()
+
 
             
 
@@ -1299,7 +1299,7 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
     # need to take derivatives about the 'central' values for all parameters that can be varied
         
     # set the correct central values for little h, sigmag, sigmau, omegam, etc. 
-    h = (H0_central/100)
+    h = (H0_central/100.0)
     H0 = H0_central
     sigmag = sigmag_central/h
     sigmau = sigmau_central/h
@@ -1354,6 +1354,8 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
                 dF_dx = dF_distortion_dx(o, F, H0, z, omegam, H0_central, Om_central, q_perp, q_para)
                 dq_perp_dx = dq_perp_distortion_dx(o, H0, H0_central, omegam, Om_central, z)
                 dq_para_dx = dq_para_distortion_dx(o, H0, H0_central, omegam, Om_central, z)
+               
+                
 
         else:
             df_dx = np.zeros((num_mus, num_k_points)) # growth rate only changes w.r.t. cosmological parameters
@@ -1361,17 +1363,16 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
             dq_perp_dx = 0.0 
             dq_para_dx = 0.0
 
-
         for muu in np.arange(len(mus)): 
-
 
             dkobs_dx = 0
             dmuobs_dx = 0
                 
             if o in [cosmo_variable.H0, cosmo_variable.Och2, cosmo_variable.Obh2, cosmo_variable.mnu]: # k and mu only change w.r.t. these cosmological parameters
                 
+                
                 dkobs_dx = dk_obs_dx(o, dF_dx, dq_perp_dx, mus[muu], ks_fiducial, F, q_perp)
-                dmuobs_dx =dmu_obs_dx(dF_dx, mus[muu], F, o)
+                dmuobs_dx = dmu_obs_dx(dF_dx, mus[muu], F, o)
                 
             else:
                 dkobs_dx = 0
@@ -1504,15 +1505,15 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
         ylabel = ylabels[mapping_var[o]]
 
         # set up plot labels 
-        ax1.set_xlim([np.min(ks), np.max(ks)])
+        ax1.set_xlim([np.min(ks_fiducial), np.max(ks_fiducial)])
         ax1.set_xlabel(xlabel, fontsize = 14)
         ax1.set_ylabel(ylabel, fontsize = 14)
         ax1.text(5e-4, 0, r"$ \mu = %.2f $" %  (mus[mu_indices[0]])  )
-        ax2.set_xlim([np.min(ks), np.max(ks)])
+        ax2.set_xlim([np.min(ks_fiducial), np.max(ks_fiducial)])
         ax2.set_xlabel(xlabel, fontsize = 14)
         ax2.set_ylabel(ylabel, fontsize = 14)
         ax2.text(5e-4, 0, r"$ \mu = %.2f $" %  (mus[mu_indices[1]])  )
-        ax3.set_xlim([np.min(ks), np.max(ks)])
+        ax3.set_xlim([np.min(ks_fiducial), np.max(ks_fiducial)])
         ax3.set_xlabel(xlabel, fontsize = 14)
         ax3.set_ylabel(ylabel, fontsize = 14)
         ax3.text(5e-4, 0, r"$ \mu = %.2f $" %  (mus[mu_indices[2]])  )
@@ -1729,7 +1730,7 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
         ylabelax1 = ylabelsax1[mapping_var[o]]
 
 
-        ax.set_xlim([np.min(ks), np.max(ks)])
+        ax.set_xlim([np.min(ks_fiducial), np.max(ks_fiducial)])
         ax.set_xlabel(xlabel, fontsize = 17)
         ax.set_ylabel(ylabel, fontsize = 17)
         ax.tick_params(axis='both', which='major', labelsize=17)
@@ -1738,7 +1739,7 @@ lin_or_nonlin: str, kspaceoption: str, tau: float, ns: float):
         ax1.legend(loc = 'upper right', fontsize = 12, ncol = 1)#, bbox_to_anchor = (-1.5, 0.5))
         #ax1.axhline(0.0, linestyle = '--', color = 'k')
 
-        ax1.set_xlim([np.min(ks), np.max(ks)])
+        ax1.set_xlim([np.min(ks_fiducial), np.max(ks_fiducial)])
         ax1.set_xticks([])
         ax1.set_xticklabels([])
         ax1.set_ylabel(ylabelax1, fontsize = 17)
@@ -2267,13 +2268,22 @@ if __name__ == "__main__":
     # H0 = 1, neutrinos = 2, baryons = 3, CDM = 4, sigmag = 5, bg = 6, rg = 7, sigmau = 8, As = 9
    
     # H0 
-    derivative_power_spectra(cosmo_variable.H0, RSPS_variable.P_gg, 1.0, 'plot2', params, 3.0, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    # derivative_power_spectra(cosmo_variable.H0, RSPS_variable.P_gg, 1.0, 'plot2', params, 3.0, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    # derivative_power_spectra(cosmo_variable.H0, RSPS_variable.P_gg, 0.0, 'plot2', params, 3.0, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    # derivative_power_spectra(cosmo_variable.H0, RSPS_variable.P_gg, 2.0, 'plot2', params, 3.0, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    
     # mnu
-    #derivative_power_spectra(cosmo_variable.mnu, RSPS_variable.P_gg, 1.0, 'plot2', params, 0.001, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    #derivative_power_spectra(cosmo_variable.mnu, RSPS_variable.P_gg, 1.2, 'plot2', params, 0.001, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
     # # # Obh
-    # derivative_power_spectra(cosmo_variable.Obh2, RSPS_variable.P_gg, 1., 'plot2', params, 0.0006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    derivative_power_spectra(cosmo_variable.Obh2, RSPS_variable.P_gg, 1., 'plot2', params, 0.0006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    derivative_power_spectra(cosmo_variable.Obh2, RSPS_variable.P_gg, 1., 'plot2', params, 0.0006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    derivative_power_spectra(cosmo_variable.Obh2, RSPS_variable.P_gg, 1., 'plot2', params, 0.0006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    
     # # # Och
-    #derivative_power_spectra(cosmo_variable.Och2, RSPS_variable.P_gg, 1., 'plot2', params, 0.006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    derivative_power_spectra(cosmo_variable.Och2, RSPS_variable.P_gg, 0., 'plot2', params, 0.006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    derivative_power_spectra(cosmo_variable.Och2, RSPS_variable.P_gg, 1., 'plot2', params, 0.006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    derivative_power_spectra(cosmo_variable.Och2, RSPS_variable.P_gg, 2., 'plot2', params, 0.006, 1.0e-4, 1.0, 2000, 100, 0.0001, 'normal', 'linear', 'log', tau, ns)
+    
 
     # for ztest in [0.1, 0.5, 1.0, 1.5, 2.0]:
         
