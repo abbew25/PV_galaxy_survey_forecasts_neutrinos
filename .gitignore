@@ -1,6 +1,8 @@
 *.png
 */*.png
 *.p
+*/*.p
 *.txt
+*/*.txt
 __pycache__/
 
