@@ -5,6 +5,11 @@ This repository contains code to produce Fisher information forecasts for galaxy
 
 This code is heavily inspired by/based off the code here: https://github.com/CullanHowlett/PV_fisher
 
+
+## UPDATE:
+
+This code has been updated since 2022 to include some corrections for the code that contributes contributions to the Fisher information from the AP Effect. Consequently, this leads to slightly better constraining power from some parameters compared to the results shown in https://arxiv.org/abs/2112.10302. There has also been corrections to ensure the code can run with newer versions of various of the required packages, and some changes have been made to improve the readability of the code.
+
 ## Technologies required
 
 This code has been updated to run on python 3.11. You will need to also install the CLASS package, see instructions at https://lesgourg.github.io/class_public/class.html.
